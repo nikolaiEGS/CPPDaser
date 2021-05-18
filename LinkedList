@@ -118,7 +118,23 @@ public:
 	// ------------ works ---------------------------------------------
 	int sizef() { return size; }
 
-
+	// ------------ works (in cas of int is proofed ---------------------------
+	void operator+=(List& x) {
+		if (this->size == x.sizef()) {
+			Node* i = nullptr;
+			Node* k = nullptr;
+			for (i = this->head; i != nullptr; i = i->next) {
+				for (k = x.head; k != nullptr; k = k->next) {
+					cout << "insight += overload ------- 2nd for loop ----------" << endl;
+					cout << "i value == " << i->value << "   k value == " << k->value << endl;
+					i->value += k->value;
+					x.head = x.head->next;
+					break;
+				}
+			}
+		}
+	}
+//--------------------------------------------------------------------------------------------------
 	void printElements(){
 		Node* i = nullptr;
 		for (i = head; i != nullptr; i = i->next) {
@@ -131,8 +147,17 @@ public:
 int main() {
 	List <int> x;
 	//List <int> y(x);
+	List <int> k;
+	k.push(4);
+	k.push(8);
+	k.push(9);
+	k.push(2);
+
+
 	x.push(4);
 	x.push(8);
+	x.push(8);
+	x.push(3);
 	x.push(9);
 	x.printElements();
 
@@ -143,17 +168,23 @@ int main() {
 	cout << " --- test deleteElement function ------" << endl;
 	x.deleteElement(9);
 	x.printElements();
-
+//---------------------------------------------------------------
 	cout << " --- test findElement function ------" << endl;
 	bool test = x.findElement(40);
 	if (test)
 		cout << "element found" << endl;
 	else
 		cout << "element not found" << endl;
-
+//--------------------------------------------------------------------
 	cout << " --- test fsize function ------" << endl;
 	int s = x.sizef();
 	cout << "size == " << s << endl;
+//-------------------------------------------------------------------
+	cout << " --- test += operator ------" << endl;
+	x += k;
+	x.printElements();
+
+
 
 	//cout << "--------- test ---------" << endl;
 	//y.printElements();
