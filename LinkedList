@@ -1,0 +1,57 @@
+#include<iostream>
+using namespace std;
+
+template <typename T> class List {
+	class Node {
+	public:
+		T value;
+		Node* next;
+		Node* prev;
+		Node(T val) : value(val), next(nullptr), prev(nullptr) {}
+	};
+		Node* head = nullptr;
+		Node* tail = nullptr;
+	
+
+public:
+
+	List() = default;
+
+	List(const List& x) {
+		cout << "insight List(x)" << endl;
+		Node* i = nullptr;
+		for (i = x.head; x.head != nullptr; i = x.head->next) {
+			this->push(i->value);
+		}
+	}
+
+
+	void push(T value) {
+		Node* temp = new Node(value);
+		if (head == nullptr) {
+			head = temp;
+			tail = temp;
+		}
+		else {
+			tail->next = temp;
+			temp->prev = tail;
+			tail = temp;
+		}
+	}
+
+	void printElements() const {
+		Node* i = nullptr;
+		for (i = head; head != nullptr; i = head->next) {
+			cout << i->value << endl;
+		}
+	}
+};
+
+int main() {
+	List <int> x;
+	List <int> y(x);
+	x.push(4);
+	x.printElements();
+	cout << "--------- test ---------" << endl;
+	y.printElements();
+}
