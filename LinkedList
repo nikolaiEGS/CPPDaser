@@ -9,11 +9,10 @@ template <typename T> class List {
 		Node* prev;
 		Node(T val) : value(val), next(nullptr), prev(nullptr) {}
 	};
-		Node* head = nullptr;
-		Node* tail = nullptr;
-		int size = 0;
-	
 
+	Node* head = nullptr;
+	Node* tail = nullptr;
+	int size = 0;
 public:
 
 	List() = default;
@@ -26,7 +25,7 @@ public:
 		}
 	}
 	*/
-// --------------- works -------------------------------------------------------
+	// --------------- works -------------------------------------------------------
 	void push(T value) {
 		cout << "insight push" << endl;
 		Node* temp = new Node(value);
@@ -50,8 +49,9 @@ public:
 				tail = nullptr;
 				T v = temp->value;
 				delete temp;
-				return v;	
-			} else {
+				return v;
+			}
+			else {
 				Node* temp = tail;
 				tail = tail->prev;
 				tail->next = nullptr;
@@ -60,15 +60,64 @@ public:
 				return v;
 			}
 		}
+		size--;
 	}
-
+	// --------------------------- works ---------------------------------------
 	void deleteElement(T val) {
-
+		Node* i = nullptr;
+		for (i = head; i != nullptr; i = i->next) {
+			if (i->value == val) {
+				// case if only one element in the List
+				if (i->prev == NULL && i->next == NULL) {
+					Node* temp = i;
+					head = nullptr;
+					tail = nullptr;
+					delete temp;
+					break;
+				}
+				// case if i is tail -------------------
+				else if (i->next == NULL) {
+					Node* temp = i;
+					tail = tail->prev;
+					tail->next = nullptr;
+					delete temp;
+					break;
+				}
+				// case if i is head --------------------------
+				else if (i->prev == NULL) {
+					Node* temp = i;
+					head = head->next;
+					head->prev = nullptr;
+					delete temp;
+					break;
+				}
+				// cas if element bitween Tail and Head --------
+				else {
+					Node* temp = i;
+					i->prev->next = i->next;
+					i->next->prev = i->prev;
+					delete temp;
+					break;
+				}
+			}
+		}
+		size--;
 	}
-
-	bool findElement() {
-
+	
+	// ---------- works ----------------------------------------------
+	bool findElement(T val) {
+		Node* i = nullptr;
+		for (i = head; i != nullptr; i = i->next) {
+			if (i->value == val) {
+				return true;
+			}
+			else{ return false; }
+				
+		}
 	}
+	// ------------ works ---------------------------------------------
+	int sizef() { return size; }
+
 
 	void printElements(){
 		Node* i = nullptr;
@@ -87,8 +136,24 @@ int main() {
 	x.push(9);
 	x.printElements();
 
-	int help = x.pop();
-	cout << "pop == "<< help << endl;
+	//---- test pop function
+	//int help = x.pop();
+	//cout << "pop == "<< help << endl;
+
+	cout << " --- test deleteElement function ------" << endl;
+	x.deleteElement(9);
+	x.printElements();
+
+	cout << " --- test findElement function ------" << endl;
+	bool test = x.findElement(40);
+	if (test)
+		cout << "element found" << endl;
+	else
+		cout << "element not found" << endl;
+
+	cout << " --- test fsize function ------" << endl;
+	int s = x.sizef();
+	cout << "size == " << s << endl;
 
 	//cout << "--------- test ---------" << endl;
 	//y.printElements();
