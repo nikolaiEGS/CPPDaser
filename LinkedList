@@ -11,12 +11,13 @@ template <typename T> class List {
 	};
 		Node* head = nullptr;
 		Node* tail = nullptr;
+		int size = 0;
 	
 
 public:
 
 	List() = default;
-
+	/* ------------------ does not work -----------------------------------
 	List(const List& x) {
 		cout << "insight List(x)" << endl;
 		Node* i = nullptr;
@@ -24,9 +25,10 @@ public:
 			this->push(i->value);
 		}
 	}
-
-
+	*/
+// --------------- works -------------------------------------------------------
 	void push(T value) {
+		cout << "insight push" << endl;
 		Node* temp = new Node(value);
 		if (head == nullptr) {
 			head = temp;
@@ -37,11 +39,41 @@ public:
 			temp->prev = tail;
 			tail = temp;
 		}
+		size++;
 	}
 
-	void printElements() const {
+	T pop() {
+		if (head != NULL) {
+			if (head->next == NULL) {
+				Node* temp = head;
+				head = nullptr;
+				tail = nullptr;
+				T v = temp->value;
+				delete temp;
+				return v;	
+			} else {
+				Node* temp = tail;
+				tail = tail->prev;
+				tail->next = nullptr;
+				T v = temp->value;
+				delete temp;
+				return v;
+			}
+		}
+	}
+
+	void deleteElement(T val) {
+
+	}
+
+	bool findElement() {
+
+	}
+
+	void printElements(){
 		Node* i = nullptr;
-		for (i = head; head != nullptr; i = head->next) {
+		for (i = head; i != nullptr; i = i->next) {
+			cout << "--------- insight print ---------" << endl;
 			cout << i->value << endl;
 		}
 	}
@@ -49,9 +81,15 @@ public:
 
 int main() {
 	List <int> x;
-	List <int> y(x);
+	//List <int> y(x);
 	x.push(4);
+	x.push(8);
+	x.push(9);
 	x.printElements();
-	cout << "--------- test ---------" << endl;
-	y.printElements();
+
+	int help = x.pop();
+	cout << "pop == "<< help << endl;
+
+	//cout << "--------- test ---------" << endl;
+	//y.printElements();
 }
