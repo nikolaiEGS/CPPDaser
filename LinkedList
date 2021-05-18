@@ -118,7 +118,7 @@ public:
 	// ------------ works ---------------------------------------------
 	int sizef() { return size; }
 
-	// ------------ works (in cas of int is proofed ---------------------------
+	// ------------ works (in case of print and if both lists have the same size ---------------------------
 	void operator+=(List& x) {
 		if (this->size == x.sizef()) {
 			Node* i = nullptr;
@@ -134,6 +134,30 @@ public:
 			}
 		}
 	}
+//---------------------------------- works ------------------------------------------------
+	bool operator==(List& x) {
+		if (this->size == x.sizef()) {
+			cout << "--------- insight == operator ----------" << endl;
+			Node* i = nullptr;
+			Node* k = nullptr;
+			for (i = this->head; i != nullptr; i = i->next) {
+				for (k = x.head; k != nullptr; k = k->next) {
+					cout << "i value == " << i->value << "   k value == " << k->value << endl;
+					if (i->value != k->value) { return false; }
+					x.head = x.head->next;
+					break;
+				}
+			}
+			delete i, k;
+			return true;
+		}
+		else { return false; }
+		
+
+
+	}
+// ----------------- to do !! ----------------------------------------------------------------------
+	//void operator=(List& x){}
 //--------------------------------------------------------------------------------------------------
 	void printElements(){
 		Node* i = nullptr;
@@ -141,6 +165,10 @@ public:
 			cout << "--------- insight print ---------" << endl;
 			cout << i->value << endl;
 		}
+		delete i;
+	}
+// ----------------- to do !! ----------------------------------------------------------------------
+	~List() {
 	}
 };
 
@@ -183,7 +211,17 @@ int main() {
 	cout << " --- test += operator ------" << endl;
 	x += k;
 	x.printElements();
-
+//--------------------------------------------------------------------
+	cout << " --- test == operator ------" << endl;
+	List <int> u;
+	u.push(1);
+	u.push(2);
+	List <int> p;
+	p.push(1);
+	p.push(2);
+	if (u == p) { cout<<"equal"<<endl;}
+	else{ cout << "not equal" << endl; }
+		
 
 
 	//cout << "--------- test ---------" << endl;
