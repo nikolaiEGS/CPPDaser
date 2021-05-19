@@ -13,19 +13,22 @@ template <typename T> class List {
 	Node* head = nullptr;
 	Node* tail = nullptr;
 	int size = 0;
+
 public:
 
 	List() = default;
-	/* ------------------ does not work -----------------------------------
-	List(const List& x) {
+
+// ------------------ does not work -----------------------------------
+	/*List(const List& x) {
 		cout << "insight List(x)" << endl;
 		Node* i = nullptr;
-		for (i = x.head; x.head != nullptr; i = x.head->next) {
+		for (i = x.head; x.head != nullptr; i = i->next) {
 			this->push(i->value);
 		}
-	}
-	*/
-	// --------------- works -------------------------------------------------------
+		delete i;
+	}*/
+
+// --------------- works -------------------------------------------------------
 	void push(T value) {
 		cout << "insight push" << endl;
 		Node* temp = new Node(value);
@@ -62,7 +65,8 @@ public:
 		}
 		size--;
 	}
-	// --------------------------- works ---------------------------------------
+
+// --------------------------- works ---------------------------------------
 	void deleteElement(T val) {
 		Node* i = nullptr;
 		for (i = head; i != nullptr; i = i->next) {
@@ -91,7 +95,7 @@ public:
 					delete temp;
 					break;
 				}
-				// cas if element bitween Tail and Head --------
+				// cas if element between Tail and Head --------
 				else {
 					Node* temp = i;
 					i->prev->next = i->next;
@@ -104,7 +108,7 @@ public:
 		size--;
 	}
 	
-	// ---------- works ----------------------------------------------
+// ---------- works ----------------------------------------------
 	bool findElement(T val) {
 		Node* i = nullptr;
 		for (i = head; i != nullptr; i = i->next) {
@@ -112,13 +116,13 @@ public:
 				return true;
 			}
 			else{ return false; }
-				
 		}
 	}
-	// ------------ works ---------------------------------------------
+
+// ------------ works ---------------------------------------------
 	int sizef() { return size; }
 
-	// ------------ works (in case of print and if both lists have the same size ---------------------------
+// ------------ works (in case of print and if both lists have the same size ---------------------------
 	void operator+=(List& x) {
 		if (this->size == x.sizef()) {
 			Node* i = nullptr;
@@ -134,6 +138,7 @@ public:
 			}
 		}
 	}
+
 //---------------------------------- works ------------------------------------------------
 	bool operator==(List& x) {
 		if (this->size == x.sizef()) {
@@ -152,12 +157,33 @@ public:
 			return true;
 		}
 		else { return false; }
-		
-
-
 	}
-// ----------------- to do !! ----------------------------------------------------------------------
-	//void operator=(List& x){}
+// ----------------- works ----------------------------------------------------------------------
+	List& operator=(List& x){
+		cout << "--------- insight operator= --------------" << endl;
+		if (*this == x){
+			return *this;
+		}
+		else {
+			Node* i = nullptr;
+			if (this->head == nullptr) {
+				for (i = x.head; i != nullptr; i = i->next) {
+					this->push(i->value);
+				}
+			} else {
+				while (this->tail != this->head) {
+					this->tail = this->tail->prev;
+					delete this->tail->next;
+				}
+				this->head = x.head;
+				for (i = x.head->next; i != nullptr; i = i->next) {
+					this->push(i->value);
+				}
+				return *this;
+			}
+			delete i;
+		}
+	}
 //--------------------------------------------------------------------------------------------------
 	void printElements(){
 		Node* i = nullptr;
@@ -167,51 +193,64 @@ public:
 		}
 		delete i;
 	}
-// ----------------- to do !! ----------------------------------------------------------------------
+// ----------------- seems to work, but ther is a warning signal(unhandeld exeption) ----------------------------------------------------------------------
 	~List() {
+		cout << "---------------- insight destructor ------------" << endl;
+		while (tail != head) {
+			tail = tail->prev;
+			delete tail->next;
+		}
+		delete tail;
 	}
 };
 
 int main() {
 	List <int> x;
-	//List <int> y(x);
 	List <int> k;
 	k.push(4);
 	k.push(8);
 	k.push(9);
-	k.push(2);
-
 
 	x.push(4);
 	x.push(8);
 	x.push(8);
 	x.push(3);
 	x.push(9);
+
 	x.printElements();
 
-	//---- test pop function
+// test copy constructor ---------------------------------------------
+	//cout << "test copy constructor" << endl;
+	//List <int> y(x);
+	//y.printElements();
+
+// test pop function -----------------------------------------------------
 	//int help = x.pop();
 	//cout << "pop == "<< help << endl;
 
 	cout << " --- test deleteElement function ------" << endl;
 	x.deleteElement(9);
 	x.printElements();
-//---------------------------------------------------------------
+
+// test findElement() ------------------------------------------------
 	cout << " --- test findElement function ------" << endl;
 	bool test = x.findElement(40);
 	if (test)
 		cout << "element found" << endl;
 	else
 		cout << "element not found" << endl;
-//--------------------------------------------------------------------
+
+// test sizef() --------------------------------------------------------
 	cout << " --- test fsize function ------" << endl;
 	int s = x.sizef();
 	cout << "size == " << s << endl;
-//-------------------------------------------------------------------
+
+//test operator =+ ---------------------------------------------------
 	cout << " --- test += operator ------" << endl;
 	x += k;
 	x.printElements();
-//--------------------------------------------------------------------
+
+// test operator==() -----------------------------------------------------
 	cout << " --- test == operator ------" << endl;
 	List <int> u;
 	u.push(1);
@@ -221,9 +260,16 @@ int main() {
 	p.push(2);
 	if (u == p) { cout<<"equal"<<endl;}
 	else{ cout << "not equal" << endl; }
-		
+	
+// test consturctor ----------------------------------
+	if( u == p){
+		List <int> z;
+		z.push(99);
+	}
 
+// test operator = -----------------------------------
+	k = x;
+	cout << " ------- test = operator -------------" << endl;
+	k.printElements();
 
-	//cout << "--------- test ---------" << endl;
-	//y.printElements();
 }
