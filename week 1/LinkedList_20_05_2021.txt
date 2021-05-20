@@ -1,0 +1,252 @@
+//@@ - 0, 0 + 1, 286 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+//separate hpp and cpp
+
+template <typename T> class List {
+	class Node {
+	public:
+		T value;
+		int key;
+		Node* next;
+		Node* prev;
+		Node(const T& val) : value(val), next(nullptr), prev(nullptr) {}
+	};
+
+	Node* head = nullptr;
+	Node* tail = nullptr;
+	int size = 0;
+	int index = 0;
+public:
+
+	List() = default;
+ //----- copy constructor -- works ----------------------------------------------------------------------
+	List(const List& x) {
+		cout << "insight List(x)" << endl;
+		for (Node* i = x.head; i != nullptr; i = i->next) {
+			this->push(i->value);
+		}
+	}
+//------ move constructor -------------------------------------------
+//	List(const List&& x) {}
+
+	// --------------- works -------------------------------------------------------
+	void push(const T& value) {
+		cout << "insight push" << endl;
+		Node* temp = new Node(value);
+		temp->key = index;
+		index++;
+		if (head == nullptr) {
+			head = temp;
+			tail = temp;
+		}
+		else {
+			tail->next = temp;
+			temp->prev = tail;
+			tail = temp;
+		}
+		size++;
+	}
+// ------------------- works ---------------------------------------------
+	void pop() { // by index
+		deleteElement_byIndex(this->tail->key);
+	}
+// ---------- works -------------------------------------------------------
+	void deleteElement_byIndex(const int indexValue) {
+		Node* element = findElement_byIndex(indexValue);
+		if (element->prev != nullptr) {
+			element->prev->next = element->next;
+		}
+		else {
+			head = element->next;
+		}
+		if (element->next != nullptr) {
+			element->next->prev = element->prev;
+		}
+		else {
+			tail = nullptr;
+		}
+		delete element;
+		--size;
+	}
+
+// -------------------------- works---------------------------------------
+	void deleteElement_byValue(const int& val) {
+		vector<int> delete_indecies = findElement_byValue(val);
+		if (delete_indecies.empty() == false){
+			for (int i = 0; i < delete_indecies.size(); i++) {
+				deleteElement_byIndex(delete_indecies[i]);
+			}
+		}
+	}
+//------------------- works -------------------------------------------
+	Node* findElement_byIndex(const int indexKey) {
+		for (Node* i = head; i != nullptr; i = i->next) {
+			if (i->key == indexKey) {
+				return i;
+			}
+		}
+	}
+// ------------------- works -------------------------------------------
+	vector<int> findElement_byValue(const T val) {
+		vector<int> indecies;
+		for (Node* i = head; i != nullptr; i = i->next) {
+			if (i->value == val) {
+				indecies.push_back(i->key);
+			}
+		}
+		return indecies;
+	}
+	// ------------ works ---------------------------------------------
+	int sizef() const { return size; }
+
+	void releaseList(const List& x) {
+		Node* currendNode = x.head;
+		while (currendNode) {
+			Node* tempNode = currendNode->next;
+			delete currendNode;
+			cout << "DELETE ";
+			currendNode = tempNode;
+		}
+		size = 0;
+	}
+
+	// ------------ fails ---------------------------------------------
+	List& operator+=(const List& x) { 
+		cout << " insight += operator overload " << endl;
+			for (Node* i = x.head; i != nullptr; i = i->next) {
+				cout << " value " << i->value << endl;
+				this->push(i->value);
+				index++;
+			}
+			size++;
+			return *this;
+	}
+	//---------------------------------- works ------------------------------------------------
+	bool operator==(const List& x) {
+		if (this->size == x.sizef()) {
+			Node* k = x.head;
+			for (Node* i = this->head; i != nullptr; i = i->next) {
+				if (i->value != k->value){ return false; }
+				k = k->next;
+			}
+			return true;
+		}
+		else { return false; }
+	}
+	List& operator=(const List& x) {
+		cout << "--------- insight operator= ---------" << endl;
+		if (*this == x) { return *this; }
+
+		releaseList(*this);
+		
+		for (Node* i = x.head; i != nullptr; i = i->next) {
+			cout << "--------- insight second loop ---------" << endl;
+			this->push(i->value);
+		}
+		return *this;
+	}
+	// --------- implementation is wrong, i dont know how to fix it -------------------------
+	//friend List& operator+(const List& x, const List& y);
+	//--------------------------------------------------------------------------------------------------
+
+	void printElements() {
+		for (Node* i = head; i != nullptr; i = i->next) {
+			cout << i->value << endl;
+		}
+	}
+
+	~List() {
+		releaseList(*this);
+	}
+};
+/* --------- implementation is wrong, i dont know how to fix it -------------------------
+template <typename T>
+List<T>& operator+(List<T> x, List<T> y) {
+	Node* temp = new Node();
+	for (Node* i = x.head; i != nullptr; i = i->next) {
+		temp->push(i->value);
+	}
+	for (Node* i = y.head; i != nullptr; i = i->next) {
+		temp->push(i->value);
+	}
+	return *temp
+}*/
+
+int main() {
+	List <int> x;
+	//List <int> y(x);
+	List <int> k;
+	k.push(4);
+	k.push(8);
+	k.push(9);
+	k.push(2);
+// test: pop function ----------------------------------------
+	k.pop();
+	k.printElements();
+
+	x.push(4);
+	x.push(8);
+	x.push(8);
+	x.push(3);
+	x.push(9);
+	x.printElements();
+	x.pop();
+
+	cout << " x size " << x.sizef() << endl; // same size after pop
+
+	x.printElements();
+
+// test: deleteElement_byValue funciton  -----  approved ---------------------------------------------------------------------------------------------------
+
+	cout << " --- test deleteElement_byValue function ------" << endl;
+	x.deleteElement_byValue(8);
+	x.printElements();
+/*
+	// test: findElement_byValue()  ------------------ works ---------------------------------------------
+	cout << " --- test findElement function ------" << endl;
+	vector<int> test = x.findElement_byValue(8);
+	for (int i = 0; i < test.size(); i++) {
+		cout << test[i] << endl;
+	}
+	if (test.size() == 0) { cout << "Element not found" << endl; }
+	/*
+	//--------------------------------------------------------------------
+	cout << " --- test fsize function ------" << endl;
+	int s = x.sizef();
+	cout << "size == " << s << endl;
+	*/
+	//------------------- fails ------------------------------------------------
+	cout << " --- test += operator ------" << endl;
+	//x += k; 
+	x.printElements();
+	
+
+	//------------------ approved --------------------------------------------------
+	cout << " --- test == operator ------" << endl;
+	List <int> u;
+	u.push(1);
+	u.push(4);
+	List <int> p;
+	p.push(1);
+	p.push(4);
+	cout << "PPPPPPPPP\n";
+	p.printElements();
+	if (u == p) { cout << "equal" << endl; }
+	else { cout << "not equal" << endl; }
+	cout << "PPPPPPPPP\n";
+	p.printElements();
+
+// test: copy constructor -----------------------------------------
+	cout << "--------- test ---------" << endl;
+	List<int> l(x);
+	l.printElements();
+	// test: = operator  -----------------------------------------
+	cout << "--------- test operator =  ---------" << endl;
+	x.printElements();
+	x = k;
+	cout << "print after = " << endl;
+	x.printElements();
+}
