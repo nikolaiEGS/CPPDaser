@@ -152,23 +152,18 @@ public:
 	}
 	// ------------ works ---------------------------------------------
 	std::size_t sizef() const { return size; }
-	/*
-	// ---------------------- doeas not work ------------------------------
+	// ---------------------- works ------------------------------
 		void reverse() {
-			cout << "------------- insight reverse ---------" << endl;
-			List<int> tempList;
-			for (const Node* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) {
-				tempList.push(currentElem->value);
-				cout << "------------- insight FOR reverse ---------" << endl;
-			}
+			std::cout << "------------- insight reverse ---------" << std::endl;
+			List<T> tempList(*this);
 			releaseList();
-			for (const Node* currentElem = tempList.head; currentElem != nullptr; currentElem = currentElem->next) {
+			for (const Node* currentElem = tempList.tail; currentElem != nullptr; currentElem = currentElem->prev) {
 				this->push(currentElem->value);
-				cout << "------------- insight FOR 2 reverse ---------" << endl;
+				std::cout << "------------- insight FOR 2 reverse ---------" << std::endl;
 			}
 			tempList.releaseList();
 		}
-		*/
+
 		// ------------ works ---------------------------------------------
 	List& operator+=(const List& x) {
 
@@ -275,7 +270,10 @@ int main() {
 	test.deleteElement_byValue(5);
 	test.deleteElement_byValue(2);
 	test.printElements();
-
+	std::cout << std::endl;
+	std::cout << "test reversefunction -----------"<< std::endl;
+	test.reverse();
+	test.printElements();
 	//cout << " x size " << x.sizef() << endl; // same size after pop
 	// test: delate by index >> works ---------------------------------
 	//x.printElements();
