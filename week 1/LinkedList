@@ -1,21 +1,20 @@
 #include<iostream>
 #include<vector>
-using namespace std;
+
 
 //separate hpp and cpp
 
 template <typename T> class List {
-	class Node {
-	public:
+	struct Node {
 		T value;
 		Node* next;
 		Node* prev;
-		Node(const T& val) : value(val), next(nullptr), prev(nullptr) {}
+		Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
 		class List;
 	};
 	Node* head = nullptr;
 	Node* tail = nullptr;
-	size_t size = 0; // change function
+	std::size_t size = 0;
 
 	void releaseList() {
 		Node* currendNode = head;
@@ -32,16 +31,20 @@ template <typename T> class List {
 public:
 
 	List() = default;
- //----- copy constructor -- works ----------------------------------------------------------------------
-	List(const List& newElem ) {
-		cout << "insight List(x)" << endl;
+	//----- copy constructor -- works ----------------------------------------------------------------------
+	List(const List& newElem) {
 		for (const Node* currentElem = newElem.head; currentElem != nullptr; currentElem = currentElem->next) {
-			this->push(currentElem->value);
+			push(currentElem->value);
 		}
 	}
-//------ move constructor ---  how can proof this constructor?? ----------------------------------------
+	// ------------------- works --------------------------
+	List(std::initializer_list<T> val) {
+		for (const auto& valTemp : val)
+			push(valTemp);
+	}
+	//-----------
+	//------ move constructor -----------------------------------------
 	List(const List&& moveElem) {
-		cout << "/////////////// insight move constructor ////////////" << endl;
 		for (const Node* currentElem = moveElem.head; currentElem != nullptr; currentElem = currentElem->next) {
 			this->push(currentElem->value);
 		}
@@ -53,7 +56,7 @@ public:
 	}
 	// --------------- works -------------------------------------------------------
 	void push(const T& value) {
-		cout << "insight push" << endl;
+		//std::cout << "insight push" << std::endl;
 		Node* temp = new Node(value);
 		if (head == nullptr) {
 			head = temp;
@@ -66,16 +69,15 @@ public:
 		}
 		size++;
 	}
-	
-// ------------------- works ---------------------------------------------
+
+	// ------------------- works ---------------------------------------------
 	void pop() {
-		deleteElement_byIndex(size-1); 
+		deleteElement_byIndex(size - 1, true);
 	}
-// ---------- works -------------------------------------------------------
-	void deleteElement_byIndex(const int index) {
-		if (head != nullptr) {
-			cout << "insight delete by Index ------------" << endl;
-			Node* element = findElement_byIndex(index);
+	// ---------- works -------------------------------------------------------
+	void deleteElement_byIndex(const int index, bool reverseIterator) {
+		if (head != nullptr && index < size && index >= 0) {
+			Node* element = findElement_byIndex(index, reverseIterator);
 			// proof if index is value
 			if (element->prev != nullptr) {
 				element->prev->next = element->next;
@@ -88,84 +90,97 @@ public:
 			}
 			else {
 				tail = nullptr;
-			}
-			cout << "delete elem value == " <<element->value << endl;
+			};
 			delete element;
 			--size;
 		}
 	}
-/*
-// -------------------------- does not work, can not find the mistake, it is a problem with the for loop ---------------------------------------
-	void deleteElement_byValue(const int& val) {
-		cout << "insight delet by element ------------" << endl;
-		int countIndex = 0;
-		for (const Node* currentElem = head; currentElem != nullptr;
-			currentElem = currentElem->next, countIndex++) {
-				cout << "insight for  delete by Value------------" << endl;
+	
+	// -------------------------- wokrs ---------------------------------------
+		void deleteElement_byValue(const int& val) {
+			std::cout << "insight delet by element ------------" << std::endl;
+			int countIndex = 0;
+			Node* currentElem = head;
+
+			while (currentElem != nullptr) {
 				if (currentElem->value == val) {
-					cout << "insight if ------------" << endl;
-					deleteElement_byIndex(countIndex);		
+					std::cout << "insight if ------------" << std::endl;
+					currentElem = currentElem->next;
+					deleteElement_byIndex(countIndex, false);
+					//currentElem = currentElem->prev;
 				}
-		}
-	}
-*/
-//------------------- works --  change -----------------------------------------
-	Node* findElement_byIndex(const int index){ // bool reverseIterate=false
-		// what if we pass wrong index ? In that case this function returns nothing which produces a crash. So in that case you should return nullptr, and check afterwards; Add reverseIterate=false argument and use it in pop, to iterate from tail to head
-		// check if indexKey <0 or indexKey>= size
-		////if(index ..........)
-		cout << "insight find by index ------------" << endl;
-		int countIndex = 0;
-		for (Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next, countIndex++) {
-			if (countIndex == index) {
-				return currentElem;
+				else {
+					currentElem = currentElem->next;
+				}
+				countIndex++;
 			}
 		}
+	//------------------- need to be checked -----------------------------------------
+	Node* findElement_byIndex(const int index, bool reverseIterator) {
+		if (index < size && index >= 0) {
+			int countIndex = 0;
+			if (reverseIterator == false) {
+				int countIndex = 0;
+				for (Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next, countIndex++) {
+					if (countIndex == index) {
+						return currentElem;
+					}
+				}
+			}
+			else {
+				int countIndex = size - 1;
+				for (Node* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev, countIndex++) {
+					if (countIndex == index) {
+						return currentElem;
+					}
+				}
+			}
+		}
+		else { return nullptr; }
 	}
-// ------------------- works -------------------------------------------
-	vector<int> findElement_byValue(const T& val) const{
-		vector<int> indecies;
+	// ------------------- works -------------------------------------------
+	std::vector<int> findElement_byValue(const T& val) const {
+		std::vector<int> indecies{};
 		int countIndex = 0;
 		for (const Node* currentElem = head;
 			currentElem != nullptr; currentElem = currentElem->next, countIndex++) {
-				if (currentElem->value == val) {
-					indecies.push_back(countIndex); 
-				}
+			if (currentElem->value == val) {
+				indecies.push_back(countIndex);
+			}
 		}
 		return indecies;
 	}
-// ------------ works ---------------------------------------------
-	int sizef() const { return size; }
-/*
-// ---------------------- doeas not work ------------------------------
-	void reverse() {
-		cout << "------------- insight reverse ---------" << endl;
-		List<int> tempList;
-		for (const Node* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) {
-			tempList.push(currentElem->value);
-			cout << "------------- insight FOR reverse ---------" << endl;
-		}
-		releaseList();
-		for (const Node* currentElem = tempList.head; currentElem != nullptr; currentElem = currentElem->next) {
-			this->push(currentElem->value);
-			cout << "------------- insight FOR 2 reverse ---------" << endl;
-		}
-		tempList.releaseList();
-	}
-	*/
 	// ------------ works ---------------------------------------------
-	List& operator+=(const List& x) { 
-		cout << " insight += operator overload " << endl;
-			for (const Node* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
-				cout << " value " << currentElem->value << endl;
-				this->push(currentElem->value);
+	std::size_t sizef() const { return size; }
+	/*
+	// ---------------------- doeas not work ------------------------------
+		void reverse() {
+			cout << "------------- insight reverse ---------" << endl;
+			List<int> tempList;
+			for (const Node* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) {
+				tempList.push(currentElem->value);
+				cout << "------------- insight FOR reverse ---------" << endl;
 			}
-			size++;
-			return *this;
+			releaseList();
+			for (const Node* currentElem = tempList.head; currentElem != nullptr; currentElem = currentElem->next) {
+				this->push(currentElem->value);
+				cout << "------------- insight FOR 2 reverse ---------" << endl;
+			}
+			tempList.releaseList();
+		}
+		*/
+		// ------------ works ---------------------------------------------
+	List& operator+=(const List& x) {
+
+		for (const Node* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
+			this->push(currentElem->value);
+		}
+		size++;
+		return *this;
 	}
-	
+
 	//---------------------------------- works ------------------------------------------------
-	bool operator==(const List& x) const{
+	bool operator==(const List& x) const {
 		if (this->size == x.sizef()) {
 			Node* right = x.head;
 
@@ -177,7 +192,7 @@ public:
 		}
 		else { return false; }
 	}
-	
+
 	// ------------  works   ----------------------------------
 	List& operator=(const List& right) {
 		if (*this == right) { return *this; }
@@ -187,25 +202,26 @@ public:
 		}
 		return *this;
 	}
-	
+
 	// move assignment ------ --------------------------------
 	List& operator=(List&& right) {
 		this->releaseList();
 		for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
-			this->push(currentElem->value);
+			push(currentElem->value);
 		}
-		right->releaseList();
+		right.releaseList();
+		return *this;
 	}
-	
+
 	// --------- implementation is wrong, i dont know how to fix it -------------------------
-	friend List& operator+(const List& x, const List& y);
+	//friend List& operator+(const List& x, const List& y);
 	//--------------------------------------------------------------------------------------------------
 	//friend ostream& operator<<(ostream& ost, List& this);
-	
+
 	void printElements() const {
 		if (head != nullptr) {
 			for (const Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
-				cout << currentElem->value << endl;
+				std::cout << currentElem->value << std::endl;
 			}
 		}
 	}
@@ -218,7 +234,7 @@ ostream& operator<<(ostream& ost, List<T>& listToPrint) {
 	}
 	return ost;
 }
-*/
+
 template <typename T>
 List<T>& operator+(List<T> left, List<T> right) {
 	List::Node* temp = new List::Node();
@@ -230,7 +246,7 @@ List<T>& operator+(List<T> left, List<T> right) {
 	}
 	return *temp;
 }
-
+*/
 int main() {
 	List <int> x;
 	//List <int> y(x);
@@ -239,18 +255,26 @@ int main() {
 	k.push(8);
 	k.push(9);
 	k.push(2);
-// test: pop function --------  >> works --------------------------------
+	// test: pop function --------  >> works --------------------------------
 	k.pop();
 	k.printElements();
-	cout << endl;
+	std::cout << std::endl;
 	x.push(4);
 	x.push(8);
 	x.push(8);
 	x.push(3);
 	x.push(9);
 	x.printElements();
-	cout << endl;
-	//x.pop();
+	std::cout << std::endl;
+
+	List<int> test({ 1,2,3,4,5,6,7,8,9 });
+	test.printElements();
+	test.pop();
+	test.printElements();
+	std::cout << std::endl;
+	test.deleteElement_byValue(5);
+	test.deleteElement_byValue(2);
+	test.printElements();
 
 	//cout << " x size " << x.sizef() << endl; // same size after pop
 	// test: delate by index >> works ---------------------------------
@@ -273,12 +297,12 @@ int main() {
 		cout << test[i] << endl;
 	}
 	if (test.size() == 0) { cout << "Element not found" << endl; }
-	*/
+	*//**
 	//--------------------------------------------------------------------
 	cout << " --- test fsize function ------" << endl;
 	int s = x.sizef();
 	cout << "size == " << s << endl;
-	
+
 	//------------------- works ------------------------------------------------
 	cout << " --- test += operator ------" << endl;
 	List<int> xx;
@@ -286,10 +310,10 @@ int main() {
 	xx.push(1);
 	xx.push(1);
 	xx.push(1);
-	x += k; 
+	x += k;
 	x.printElements();
-	
-	
+
+
 	//------------------ approved --------------------------------------------------
 	cout << " --- test == operator ------" << endl;
 	List <int> u;
@@ -315,12 +339,12 @@ int main() {
 	cout << endl;
 	x.printElements();
 	cout << endl;
-		x = k;
+	x = k;
 	x.printElements();
 	cout << endl;
 	k.printElements();
-	
-// test: copy constructor -----------------------------------------
+
+	// test: copy constructor -----------------------------------------
 	cout << "--------- test move constructor ---------" << endl;
 	List<int> l();
 	p = l();
@@ -331,5 +355,5 @@ int main() {
 	x = k;
 	cout << "print after = " << endl;
 	x.printElements();
-
+	*/
 }
