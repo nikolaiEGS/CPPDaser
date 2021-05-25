@@ -9,7 +9,6 @@ struct Node {
 	Node* next;
 	Node* prev;
 	Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
-	class List;
 };
 
 template <typename T>
@@ -20,6 +19,12 @@ class List {
 	void releaseList();
 public:
 	static std::size_t countList;
+
+	List() = default;
+	List(const List& newElem);
+	List(std::initializer_list<T> val);
+	~List();
+
 	static void swapList(List& first, List& second);
 	static List& copyList(List& destination, const List& right);
 	static List& moveList(List& destination, List& right);
@@ -35,50 +40,16 @@ public:
 	void reverse();
 	void printElements() const;
 
-	List() = default;
-	//----- copy constructor -- works ----------------------------------------------------------------------
-	List(const List& newElem) { copyList(*this, newElem);}
-	// ------------------- works --------------------------
-	List(std::initializer_list<T> val) {
-		for (const auto& valTemp : val)
-			push(valTemp);
-		countList++;
-	}
+	List& operator+=(const List& x);
+	bool operator==(const List& right) const;
+
 	//------ move constructor -----------------------------------------
 	
 	List(List&& moveElem) noexcept : List() {
 		std::cout << "-- moveConst --" << std::endl;
 		swapList(*this, moveElem);
 	}
-
-	~List() {
-		releaseList();
-	}
-	// --------------- works -------------------------------------------------------
 	
-
-		// ------------ works ---------------------------------------------
-	List& operator+=(const List& x) {
-		for (const Node<T>* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
-			push(currentElem->value);
-		}
-		size++;
-		return *this;
-	}
-
-	//---------------------------------- works ------------------------------------------------
-	bool operator==(const List& right) const {
-		if (size == right.sizef()) {
-			Node<T>* rightTemp = right.head;
-
-			for (auto left = head; left != nullptr; left = left->next, rightTemp = rightTemp->next) {
-					if (left->value != rightTemp->value) { return false; }
-			}
-			return true;
-		}
-		else { return false; }
-	}
-
 	// ---------------------------------------------
 	List& operator=(List right) {
 		std::cout << "--- copy assignment ---" << std::endl;
@@ -112,12 +83,25 @@ public:
 		}
 		return ost;
 	}*/
-
-	
 };
 
 template <typename T>
 std::size_t List<T>::countList = 0;
+
+template <typename T>
+List<T>::List(const List& newElem) { copyList(*this, newElem); }
+
+template <typename T>
+List<T>::List(std::initializer_list<T> val) {
+	for (const auto& valTemp : val)
+		push(valTemp);
+	countList++;
+}
+
+template <typename T>
+List<T>::~List() {
+	releaseList();
+}
 
 template <typename T>
 void List<T>::releaseList() {
@@ -253,6 +237,7 @@ std::vector<int> List<T>::findElement_byValue(const T& val) const {
 	}
 	return indecies;
 }
+
 template <typename T>
 std::size_t List<T>::sizef() const { return size; }
 
@@ -306,6 +291,28 @@ void List<T>::printElements() const {
 		}
 		std::cout << std::endl;
 	}
+}
+
+template <typename T>
+List<T>& List<T>::operator+=(const List& x) {
+	for (const Node<T>* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
+		push(currentElem->value);
+	}
+	size++;
+	return *this;
+}
+
+template <typename T>
+bool List<T>::operator==(const List& right) const {
+	if (size == right.sizef()) {
+		Node<T>* rightTemp = right.head;
+
+		for (auto left = head; left != nullptr; left = left->next, rightTemp = rightTemp->next) {
+			if (left->value != rightTemp->value) { return false; }
+		}
+		return true;
+	}
+	else { return false; }
 }
 
 /*
