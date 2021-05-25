@@ -3,51 +3,47 @@
 
 
 //separate hpp and cpp
+template <typename T>
+struct Node {
+	T value;
+	Node* next;
+	Node* prev;
+	Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
+	class List;
+};
 
-template <typename T> class List {
-	struct Node {
-		T value;
-		Node* next;
-		Node* prev;
-		Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
-		class List;
-	};
-	Node* head = nullptr;
-	Node* tail = nullptr;
+template <typename T>
+class List {
+	Node<T>* head = nullptr;
+	Node<T>* tail = nullptr;
 	std::size_t size = 0;
-
-	void releaseList() {
-		Node* currendNode = head;
-		while (currendNode) {
-			Node* tempNode = currendNode->next;
-			delete currendNode;
-			//cout << "DELETE " << endl;
-			currendNode = tempNode;
-		}
-		head = nullptr;
-		tail = nullptr;
-		size = 0;
-		
-	}
+	void releaseList();
 public:
 	static std::size_t countList;
-
 	static void swapList(List& first, List& second);
 	static List& copyList(List& destination, const List& right);
 	static List& moveList(List& destination, List& right);
 
+	void push(const T& value);
+	void pop();
+	void deleteElement_byIndex(const int index, bool reverseIterator);
+	void deleteElement_byIndex(std::vector<int> values);
+	void deleteElement_byValue(const int& val, bool allElem);
+	Node<T>* findElement_byIndex(const int index, bool reverseIterator);
+	std::vector<int> findElement_byValue(const T& val) const;
+	std::size_t sizef() const;
+	void reverse();
+	void printElements() const;
+
 	List() = default;
 	//----- copy constructor -- works ----------------------------------------------------------------------
-	List(const List& newElem) {
-		copyList(*this, newElem);
-	}
+	List(const List& newElem) { copyList(*this, newElem);}
 	// ------------------- works --------------------------
 	List(std::initializer_list<T> val) {
 		for (const auto& valTemp : val)
 			push(valTemp);
 		countList++;
 	}
-
 	//------ move constructor -----------------------------------------
 	
 	List(List&& moveElem) noexcept : List() {
@@ -58,138 +54,12 @@ public:
 	~List() {
 		releaseList();
 	}
-	
-	
 	// --------------- works -------------------------------------------------------
-	void push(const T& value) {
-		Node* temp = new Node(value);
-		if (head == nullptr) {
-			head = temp;
-			tail = temp;
-		}
-		else {
-			tail->next = temp;
-			temp->prev = tail;
-			tail = temp;
-		}
-		size++;
-	}
-
-	// ------------------- works ---------------------------------------------
-	void pop() {
-		deleteElement_byIndex(size - 1, true);
-	}
-	// ---------- works -------------------------------------------------------
-	void deleteElement_byIndex(const int index, bool reverseIterator) {
-		if (head != nullptr && index < size && index >= 0) {
-			Node* element = findElement_byIndex(index, reverseIterator);
-			if (element->prev != nullptr) {
-				element->prev->next = element->next;
-			}
-			else {
-				head = element->next;
-			}
-			if (element->next != nullptr) {
-				element->next->prev = element->prev;
-			}
-			else {
-				tail = element->prev;
-			};
-			delete element;
-			--size;
-		}
-	}
-//----------------------------------- works ----------------------------------------------------
-	void deleteElement_byIndex(std::vector<int> values) {
-		if (values.empty() != true) {
-			for (int vecIndex = 0; vecIndex < values.size(); vecIndex++) {
-				if (values.size() == 1) {
-					deleteElement_byIndex(values[vecIndex], false);
-				}
-				else {
-					if (values[vecIndex] >= size / 2) {
-						deleteElement_byIndex(values[vecIndex], true);
-					}
-					else {
-						deleteElement_byIndex(values[vecIndex], false);
-					}
-					if (vecIndex != values.size() - 1) {
-						if (values[vecIndex] < values[vecIndex + 1]) {
-							for (int vecIndex_ = vecIndex + 1; vecIndex_ < values.size(); vecIndex_++) {
-								values[vecIndex_] = values[vecIndex_] - 1;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	// -------------------------- wokrs ---------------------------------------
-	void deleteElement_byValue(const int& val, bool allElem) {
-		int countIndex = 0;
-		Node* currentElem = head;
-
-		while (currentElem != nullptr) {
-			if (currentElem->value == val) {
-				currentElem = currentElem->next;
-				deleteElement_byIndex(countIndex, false);
-				if (allElem == false) { break; }
-			}
-			else {
-				currentElem = currentElem->next;
-				countIndex++;
-			}
-		}
-	}
-	//------------------- need to be checked -----------------------------------------
-	Node* findElement_byIndex(const int index, bool reverseIterator) {
-		if (index < size && index >= 0) {
-			if (reverseIterator == false) {
-				int countIndex = 0;
-				for (Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
-					if (countIndex++ == index) {
-						return currentElem;
-					}
-				}
-			}
-			else {
-				int countIndex = size - 1;
-				for (Node* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) {
-					if (countIndex-- == index) {
-						return currentElem;
-					}
-				}
-			}
-		}
-		else { return nullptr; }
-	}
-	// ------------------- works -------------------------------------------
-	std::vector<int> findElement_byValue(const T& val) const {
-		std::vector<int> indecies{};
-		int countIndex = 0;
-		for (const Node* currentElem = head;
-			currentElem != nullptr; currentElem = currentElem->next, countIndex++) {
-			if (currentElem->value == val) {
-				indecies.push_back(countIndex);
-			}
-		}
-		return indecies;
-	}
-	// ------------ works ---------------------------------------------
-	std::size_t sizef() const { return size; }
-	// ---------------------- works ------------------------------
-	void reverse() {
-		List<T> tempList(*this);
-		releaseList();
-		for (const Node* currentElem = tempList.tail; currentElem != nullptr; currentElem = currentElem->prev) {
-			push(currentElem->value);
-		}
-		tempList.releaseList();
-	}
+	
 
 		// ------------ works ---------------------------------------------
 	List& operator+=(const List& x) {
-		for (const Node* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
+		for (const Node<T>* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
 			push(currentElem->value);
 		}
 		size++;
@@ -199,7 +69,7 @@ public:
 	//---------------------------------- works ------------------------------------------------
 	bool operator==(const List& right) const {
 		if (size == right.sizef()) {
-			Node* rightTemp = right.head;
+			Node<T>* rightTemp = right.head;
 
 			for (auto left = head; left != nullptr; left = left->next, rightTemp = rightTemp->next) {
 					if (left->value != rightTemp->value) { return false; }
@@ -243,19 +113,158 @@ public:
 		return ost;
 	}*/
 
-	void printElements() const {
-		if (head != nullptr) {
-			for (const Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
-				std::cout << currentElem->value << " , " ;
-			}
-			std::cout << std::endl;
-		}
-	}
+	
 };
 
 template <typename T>
 std::size_t List<T>::countList = 0;
 
+template <typename T>
+void List<T>::releaseList() {
+	Node<T>* currendNode = head;
+	while (currendNode) {
+		Node<T>* tempNode = currendNode->next;
+		delete currendNode;
+		//cout << "DELETE " << endl;
+		currendNode = tempNode;
+	}
+	head = nullptr;
+	tail = nullptr;
+	size = 0;
+}
+
+template <typename T>
+void List<T>::push(const T& value) {
+	Node<T>* temp = new Node<T>(value);
+	if (head == nullptr) {
+		head = temp;
+		tail = temp;
+	}
+	else {
+		tail->next = temp;
+		temp->prev = tail;
+		tail = temp;
+	}
+	size++;
+}
+
+template <typename T>
+void List<T>::pop() {
+	deleteElement_byIndex(size - 1, true);
+}
+
+template <typename T>
+void List<T>::deleteElement_byIndex(const int index, bool reverseIterator) {
+	if (head != nullptr && index < size && index >= 0) {
+		Node<T>* element = findElement_byIndex(index, reverseIterator);
+		if (element->prev != nullptr) {
+			element->prev->next = element->next;
+		}
+		else {
+			head = element->next;
+		}
+		if (element->next != nullptr) {
+			element->next->prev = element->prev;
+		}
+		else {
+			tail = element->prev;
+		};
+		delete element;
+		--size;
+	}
+}
+
+template <typename T>
+void List<T>::deleteElement_byIndex(std::vector<int> values) {
+	if (values.empty() != true) {
+		for (int vecIndex = 0; vecIndex < values.size(); vecIndex++) {
+			if (values.size() == 1) {
+				deleteElement_byIndex(values[vecIndex], false);
+			}
+			else {
+				if (values[vecIndex] >= size / 2) {
+					deleteElement_byIndex(values[vecIndex], true);
+				}
+				else {
+					deleteElement_byIndex(values[vecIndex], false);
+				}
+				if (vecIndex != values.size() - 1) {
+					if (values[vecIndex] < values[vecIndex + 1]) {
+						for (int vecIndex_ = vecIndex + 1; vecIndex_ < values.size(); vecIndex_++) {
+							values[vecIndex_] = values[vecIndex_] - 1;
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+template <typename T>
+void List<T>::deleteElement_byValue(const int& val, bool allElem) {
+	int countIndex = 0;
+	Node<T>* currentElem = head;
+
+	while (currentElem != nullptr) {
+		if (currentElem->value == val) {
+			currentElem = currentElem->next;
+			deleteElement_byIndex(countIndex, false);
+			if (allElem == false) { break; }
+		}
+		else {
+			currentElem = currentElem->next;
+			countIndex++;
+		}
+	}
+}
+
+template <typename T>
+Node<T>* List<T>::findElement_byIndex(const int index, bool reverseIterator) {
+	if (index < size && index >= 0) {
+		if (reverseIterator == false) {
+			int countIndex = 0;
+			for (Node<T>* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
+				if (countIndex++ == index) {
+					return currentElem;
+				}
+			}
+		}
+		else {
+			int countIndex = size - 1;
+			for (Node<T>* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) {
+				if (countIndex-- == index) {
+					return currentElem;
+				}
+			}
+		}
+	}
+	else { return nullptr; }
+}
+
+template <typename T>
+std::vector<int> List<T>::findElement_byValue(const T& val) const {
+	std::vector<int> indecies{};
+	int countIndex = 0;
+	for (const Node<T>* currentElem = head;
+		currentElem != nullptr; currentElem = currentElem->next, countIndex++) {
+		if (currentElem->value == val) {
+			indecies.push_back(countIndex);
+		}
+	}
+	return indecies;
+}
+template <typename T>
+std::size_t List<T>::sizef() const { return size; }
+
+template <typename T>
+void List<T>::reverse() {
+	List<T> tempList(*this);
+	releaseList();
+	for (const Node<T>* currentElem = tempList.tail; currentElem != nullptr; currentElem = currentElem->prev) {
+		push(currentElem->value);
+	}
+	tempList.releaseList();
+}
 /*
 template <typename T>
 void List<T>::swapList(List<T>& first, List<T>& second) {
@@ -276,7 +285,7 @@ void List<T>::swapList(List<T>& first, List<T>& second) {
 template <typename T>
 List<T>& List<T>::copyList(List<T>& destination, const List<T>& right) {
 	destination.releaseList();
-	for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
 		destination.push(currentElem->value);
 	}
 	return destination;
@@ -287,6 +296,16 @@ List<T>& List<T>::moveList(List<T>& destination, List<T>& right) {
 	copyList(destination, right);
 	right.releaseList();
 	return destination;
+}
+
+template <typename T>
+void List<T>::printElements() const {
+	if (head != nullptr) {
+		for (const Node<T>* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
+			std::cout << currentElem->value << " , ";
+		}
+		std::cout << std::endl;
+	}
 }
 
 /*
