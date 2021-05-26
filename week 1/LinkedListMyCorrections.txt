@@ -1,0 +1,360 @@
+#include<iostream>
+#include<vector>
+
+
+//separate hpp and cpp
+
+template <typename T> class List {
+	struct Node {
+		T value;
+		Node* next;
+		Node* prev;
+		Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
+		class List;
+	};
+	Node* head = nullptr;
+	Node* tail = nullptr;
+	std::size_t size = 0;
+
+	void releaseList() {
+		Node* currendNode = head;
+		while (currendNode) {
+			Node* tempNode = currendNode->next;
+			delete currendNode;
+			//cout << "DELETE " << endl;
+			currendNode = tempNode;
+		}
+		head = nullptr;
+		tail = nullptr;
+		size = 0;
+	}
+public:
+
+	List() = default;
+	//----- copy constructor -- works ----------------------------------------------------------------------
+	List(const List& newElem) {
+		for (const Node* currentElem = newElem.head; currentElem != nullptr; currentElem = currentElem->next) {
+			push(currentElem->value);
+		}
+	}
+	// ------------------- works --------------------------
+	List(std::initializer_list<T> val) { //[DAVID]: great
+		for (const auto& valTemp : val)
+			push(valTemp);
+	}
+	//-----------
+	//------ move constructor -----------------------------------------
+	List(const List&& moveElem) {
+		for (const Node* currentElem = moveElem.head; currentElem != nullptr; currentElem = currentElem->next) {
+			this->push(currentElem->value);
+		}
+		moveElem.releaseList();
+	}
+
+	~List() {
+		releaseList();
+	}
+	// --------------- works -------------------------------------------------------
+	void push(const T& value) {
+		//std::cout << "insight push" << std::endl;
+		Node* temp = new Node(value);
+		if (head == nullptr) {
+			head = temp;
+			tail = temp;
+		}
+		else {
+			tail->next = temp;
+			temp->prev = tail;
+			tail = temp;
+		}
+		size++;
+	}
+
+	// ------------------- works ---------------------------------------------
+	void pop() {
+		deleteElement_byIndex(size - 1, true);
+	}
+	// ---------- works -------------------------------------------------------
+	void deleteElement_byIndex(const int index, bool reverseIterator) {
+		if (head != nullptr && index < size && index >= 0) {
+			Node* element = findElement_byIndex(index, reverseIterator);
+			// proof if index is value
+			if (element->prev != nullptr) {
+				element->prev->next = element->next;
+			}
+			else {
+				head = element->next;
+			}
+			if (element->next != nullptr) {
+				element->next->prev = element->prev;
+			}
+			else {
+				//tail = nullptr; // [DAVID] right ?
+				tail = element->prev;
+			};
+			delete element;
+			--size;
+		}
+	}
+
+	// -------------------------- wokrs ---------------------------------------
+	void deleteElement_byValue(const int& val) { // [DAVID]: add bool parameter to delete all or delete only first occurance
+		std::cout << "insight delet by element ------------" << std::endl;
+		int countIndex = 0;
+		Node* currentElem = head;
+
+		while (currentElem != nullptr) {
+			if (currentElem->value == val) {
+				std::cout << "insight if ------------" << std::endl;
+				currentElem = currentElem->next;
+				deleteElement_byIndex(countIndex, true); // [DAVID]: overload this function with (int and vector<int>)
+				//currentElem = currentElem->prev;
+			}
+			else {
+				currentElem = currentElem->next;
+			}
+			countIndex++;
+		}
+	}
+	//------------------- need to be checked -----------------------------------------
+	Node* findElement_byIndex(const int index, bool reverseIterator) {
+		if (index < size && index >= 0) {
+			//int countIndex = 0; // [DAVID] move inside if
+			if (reverseIterator == false) {
+				int countIndex = 0;
+				for (Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
+					if (countIndex++ == index) {
+						return currentElem;
+					}
+				}
+			}
+			else {
+				int countIndex = size - 1; // [DAVID] shadows int countIndex = 0;
+				for (Node* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) { //[DAVID]: issue here
+					//auto z = *currentElem; // [DAVID]: make this line works
+					if (countIndex-- == index) { //[DAVID]: wrong logic 
+						return currentElem;
+					}
+				}
+			}
+		}
+		else { return nullptr; }
+	}
+	// ------------------- works -------------------------------------------
+	std::vector<int> findElement_byValue(const T& val) const {
+		std::vector<int> indecies{};
+		int countIndex = 0;
+		for (const Node* currentElem = head;
+			currentElem != nullptr; currentElem = currentElem->next, countIndex++) {
+			if (currentElem->value == val) {
+				indecies.push_back(countIndex);
+			}
+		}
+		return indecies;
+	}
+	// ------------ works ---------------------------------------------
+	std::size_t sizef() const { return size; }
+	// ---------------------- works ------------------------------
+	void reverse() {
+		std::cout << "------------- insight reverse ---------" << std::endl;
+		List<T> tempList(*this);
+		releaseList();
+		for (const Node* currentElem = tempList.tail; currentElem != nullptr; currentElem = currentElem->prev) {
+			this->push(currentElem->value);
+			std::cout << "------------- insight FOR 2 reverse ---------" << std::endl;
+		}
+		tempList.releaseList();
+	}
+
+	// ------------ works ---------------------------------------------
+	List& operator+=(const List& x) {
+
+		for (const Node* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
+			this->push(currentElem->value);
+		}
+		size++;
+		return *this;
+	}
+
+	//---------------------------------- works ------------------------------------------------
+	bool operator==(const List& x) const {
+		if (this->size == x.sizef()) {
+			Node* right = x.head;
+
+			for (auto left = this->head, right = x.head;
+				left != nullptr; left = left->next, right = right->next) {
+				if (left->value != right->value) { return false; }
+			}
+			return true;
+		}
+		else { return false; }
+	}
+
+	// ------------  works   ----------------------------------
+	List& operator=(const List& right) {
+		if (*this == right) { return *this; }
+		this->releaseList();
+		for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+			this->push(currentElem->value);
+		}
+		return *this;
+	}
+
+	// move assignment ------ --------------------------------
+	List& operator=(List&& right) {
+		this->releaseList();
+		for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+			push(currentElem->value);
+		}
+		right.releaseList();
+		return *this;
+	}
+
+	// --------- implementation is wrong, i dont know how to fix it -------------------------
+	//friend List& operator+(const List& x, const List& y);
+	//--------------------------------------------------------------------------------------------------
+	//friend ostream& operator<<(ostream& ost, List& this);
+
+	void printElements() const {
+		if (head != nullptr) {
+			for (const Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
+				std::cout << currentElem->value << std::endl;
+			}
+		}
+	}
+};
+/*
+ //--------- implementation is wrong, i dont know how to fix it -------------------------
+ostream& operator<<(ostream& ost, List<T>& listToPrint) {
+	for (const Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
+		ost << currentElem->value << "  ,  " << flush;
+	}
+	return ost;
+}
+
+template <typename T>
+List<T>& operator+(List<T> left, List<T> right) {
+	List::Node* temp = new List::Node();
+	for (const Node* currentElem = left.head; currentElem != nullptr; currentElem = currentElem->next) {
+		temp->push(currentElem->value);
+	}
+	for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+		temp->push(currentElem->value);
+	}
+	return *temp;
+}
+*/
+int main() {
+	List <int> x;
+	//List <int> y(x);
+	List <int> k;
+	k.push(4);
+	k.push(8);
+	k.push(9);
+	k.push(2);
+	// test: pop function --------  >> works --------------------------------
+	k.pop();
+	k.printElements(); // [DAVID]: tail becomes null after pop, It will make crash later
+	k.pop();
+	std::cout << std::endl;
+	x.push(4);
+	x.push(8);
+	x.push(8);
+	x.push(3);
+	x.push(9);
+	x.printElements();
+	std::cout << std::endl;
+
+	List<int> test({ 1,2,3,4,5,6,7,8,9 });
+	test.printElements();
+	test.pop();
+	test.printElements();
+	std::cout << std::endl;
+	test.deleteElement_byValue(5);
+	test.deleteElement_byValue(2);
+	test.printElements();
+	std::cout << std::endl;
+	std::cout << "test reversefunction -----------" << std::endl;
+	test.reverse();
+	test.printElements();
+	//cout << " x size " << x.sizef() << endl; // same size after pop
+	// test: delate by index >> works ---------------------------------
+	//x.printElements();
+	//cout << " --- test delete_byIndex function ------" << endl;
+	//x.deleteElement_byIndex(0);
+	//x.printElements();
+
+
+// test: deleteElement_byValue funciton  ----- ---------------------------------------------------------------------------------------------------
+
+	//cout << " --- test deleteElement_byValue function ------" << endl;
+	//x.deleteElement_byValue(8);
+	//x.printElements();
+/*
+	// test: findElement_byValue()  ------------------ works ---------------------------------------------
+	cout << " --- test findElement function ------" << endl;
+	vector<int> test = x.findElement_byValue(8);
+	for (int i = 0; i < test.size(); i++) {
+		cout << test[i] << endl;
+	}
+	if (test.size() == 0) { cout << "Element not found" << endl; }
+	*//**
+	//--------------------------------------------------------------------
+	cout << " --- test fsize function ------" << endl;
+	int s = x.sizef();
+	cout << "size == " << s << endl;
+
+	//------------------- works ------------------------------------------------
+	cout << " --- test += operator ------" << endl;
+	List<int> xx;
+	xx.push(1);
+	xx.push(1);
+	xx.push(1);
+	xx.push(1);
+	x += k;
+	x.printElements();
+
+
+	//------------------ approved --------------------------------------------------
+	cout << " --- test == operator ------" << endl;
+	List <int> u;
+	u.push(1);
+	u.push(4);
+	List <int> p;
+	p.push(1);
+	p.push(4);
+	cout << "PPPPPPPPP\n";
+	p.printElements();
+	if (u == p) { cout << "equal" << endl; }
+	else { cout << "not equal" << endl; }
+	cout << "PPPPPPPPP\n";
+	p.printElements();
+
+	List<int> xxx(xx);
+	xxx.printElements();
+
+	//p.reverse();
+	//p.printElements();
+	cout << "----------- Test = operator ---------------------" << endl;
+	k.printElements();
+	cout << endl;
+	x.printElements();
+	cout << endl;
+	x = k;
+	x.printElements();
+	cout << endl;
+	k.printElements();
+
+	// test: copy constructor -----------------------------------------
+	cout << "--------- test move constructor ---------" << endl;
+	List<int> l();
+	p = l();
+	p.printElements();
+	// test: = operator  -----------------------------------------
+	cout << "--------- test operator =  ---------" << endl;
+	x.printElements();
+	x = k;
+	cout << "print after = " << endl;
+	x.printElements();
+	*/
+}
