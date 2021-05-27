@@ -1,24 +1,23 @@
 #include<iostream>
 #include<vector>
+#include <stdlib.h>
+#include <cstdlib>
 //separate hpp and cpp
 
-template <typename List>
+/*
+template <typename T>
 class ListIterator {
 public:
-	using ValueType = typename List::ValueType;
-	using PointerType = ValueType*;
-	using ReferenceType = ValueType&;
-
-	ListIterator(const PointerType ptr) : m_Ptr(ptr){}
+	ListIterator(const Node<T>* ptr) : m_Ptr(ptr){}
 
 	ListIterator& operator++() {
 		m_Ptr = m_Ptr->next;
 		return *this;
 	}
 private:
-	PointerType m_Ptr;
-
+	Node<T>* m_Ptr;
 };
+*/
 
 template <typename T>
 struct Node {
@@ -36,8 +35,7 @@ class List {
 	std::size_t size = 0;
 	void releaseList();
 public:
-	using ValueType = T;
-	using Iterator = ListIterator<List<T>>;
+	//using Iterator = ListIterator<List<value_type>>;
 
 	List() = default;
 	List(const List& newElem); // works
@@ -61,30 +59,42 @@ public:
 
 	List& operator+=(const List& x); // works
 	bool operator==(const List& right) const; // works
+	bool operator!=(const List& right) const; // works
 	List operator+(const List<T>& right); // works
 	List& operator=(List right); // works
 	List& operator=(List&& right) noexcept;
+	T operator[](const int index); // works
+	void* operator new(const size_t count); // seems to work
+	//void operator delete(const void* p); // doeas not work
+	List& operator*(List* ptr); // seems to work
 
 	List(List&& moveElem) noexcept : List() { // works
 		std::cout << "-- moveConst --" << std::endl;
 		swapList(*this, moveElem);
 	}
 
-
 	/*
 	Iterator begin() {return head;}
-	
+
 	Iterator end() {return nullptr;}
-	//void testPrint(Iterator i = h
-	*/
-	
+	void testPrint() {
+
+		if (head != nullptr) {
+			for (Iterator currentElem = begin(); currentElem != end(); currentElem++) {
+				std::cout << currentElem->value << " , ";
+			}
+			std::cout << std::endl;
+		}
+	}
+
+
 	// --------- does not work ------------------------------------------------------------
-	std::ostream& operator<<(std::ostream& ost, const List<T>& list) {
+	/*std::ostream& operator<<(std::ostream& ost, const List<T>& list) {
 		for (const Node* currentElem = list.head; currentElem != nullptr; currentElem = currentElem->next) {
 			ost << currentElem->value << "  ,  " << std::flush;
 		}
 		return ost;
-	}
+	}*/
 };
 
 
@@ -264,6 +274,7 @@ void List<T>::swapList(List<T>& first, List<T>& second) {
 	std::cout << "-- swapFunction --" << std::endl;
 	std::swap(first.head, second.head);
 	std::swap(first.tail, second.tail);
+	std::swap(first.size, second.size);
 }
 
 
@@ -273,7 +284,7 @@ List<T>& List<T>::copyList(List<T>& destination, const List<T>& right) {
 	destination.releaseList();
 	if (right.head != nullptr) {
 		for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
-			std::cout << "-- copyList LOOP --- "<< std::endl;
+			std::cout << "-- copyList LOOP --- " << std::endl;
 			destination.push(currentElem->value);
 		}
 
@@ -296,7 +307,7 @@ List<T>& List<T>::operator+=(const List& right) {
 	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
 		push(currentElem->value);
 	}
-	size++;
+	size += right.size;
 	return *this;
 }
 
@@ -313,7 +324,19 @@ bool List<T>::operator==(const List& right) const {
 }
 
 template <typename T>
-List<T> List<T>::operator+(const List<T>& right){
+bool List<T>::operator!=(const List& right) const {
+	if (size == right.sizef()) {
+		Node<T>* rightTemp = right.head;
+		for (auto left = head; left != nullptr; left = left->next, rightTemp = rightTemp->next) {
+			if (left->value != rightTemp->value) { return true; }
+		}
+		return false;
+	}
+	else { return true; }
+}
+
+template <typename T>
+List<T> List<T>::operator+(const List<T>& right) {
 	std::cout << "insight operator+ ---------" << std::endl;
 	List<T> temp(*this);
 	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
@@ -335,6 +358,30 @@ List<T>& List<T>::operator=(List&& right) noexcept {
 	return *this;
 }
 
+template <typename T>
+T List<T>::operator[](const int index) {
+	Node<T>* eleme = findElement_byIndex(index, false);
+	return eleme->value;
+}
+template <typename T>
+void* List<T>::operator new(size_t count) { //size_t: positiv integer
+	void *p = std::malloc(sizeof(List)*count);
+	return p;
+}
+/*
+template <typename T>
+void List<T>::operator delete(void* p) {
+	std::free(p);
+}*/
+
+template <typename T>
+List<T>& List<T>::operator*(List* ptr) {
+	List<T> tempList;
+	tempList.head = ptr->head;
+	tempList.tail = ptr->tail;
+	return tempList;
+}
+
 int main() {
 	List <int> x;
 	//List <int> y(x);
@@ -345,7 +392,7 @@ int main() {
 	k.push(2);
 	std::cout << std::endl;
 	// test: pop function --------  >> works --------------------------------
-	std::cout <<"popfunction"<< std::endl;
+	std::cout << "popfunction" << std::endl;
 	k.pop();
 	k.printElements();
 	std::cout << std::endl;
@@ -371,7 +418,7 @@ int main() {
 
 	std::cout << std::endl;
 
-	std::cout << "test reversefunction -----------"<< std::endl;
+	std::cout << "test reversefunction -----------" << std::endl;
 	test.reverse();
 	test.printElements();
 
@@ -384,6 +431,7 @@ int main() {
 	tt.printElements();
 	std::cout << std::endl;
 	std::cout << std::endl;
+
 	// test deletElement_byIndex(vector) ---------  works -------
 	std::cout << "test deleteElement by indecies VECTOR -----------" << std::endl;
 	List<int> hh({ 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 });
@@ -398,11 +446,13 @@ int main() {
 	List<int> swsw({ 9,9,9,9,9 });
 	sw.printElements();
 	swsw.printElements();
+
 	// works ------------------------------------------------------------
 	std::cout << std::endl;
 	List<int>::swapList(sw, swsw);
 	sw.printElements();
 	swsw.printElements();
+
 	// works ------------------------------------------------------------
 	std::cout << std::endl;
 	std::cout << "--- assignment test -----------" << std::endl;
@@ -412,12 +462,21 @@ int main() {
 
 	// works ------------------------------------------------------------
 	std::cout << "--- operator+ test -----------" << std::endl;
-	List<int> TTT = sw+swsw;
+	List<int> TTT = sw + swsw;
 	std::cout << "--- start -----------" << std::endl;
 	TTT.printElements();
 	std::cout << "--- end -----------" << std::endl;
+	// works ------------------------------------------------------------
+	std::cout << "--- [] operator -----------" << std::endl;
+	std::cout << TTT[2] << std::endl;
 
-
+	List<int>* newList = new List<int>();
+	newList->push(5);
+	newList->push(5);
+	newList->push(5);
+	newList->push(5);
+	newList->printElements();
+	
 
 	//std::cout << "test << Operator -----------" << std::endl;
 	//std::cout << test << std:endl;
