@@ -1,107 +1,116 @@
 #include<iostream>
 #include<vector>
-
-
 //separate hpp and cpp
+
+template <typename List>
+class ListIterator {
+public:
+	using ValueType = typename List::ValueType;
+	using PointerType = ValueType*;
+	using ReferenceType = ValueType&;
+
+	ListIterator(const PointerType ptr) : m_Ptr(ptr){}
+
+	ListIterator& operator++() {
+		m_Ptr = m_Ptr->next;
+		return *this;
+	}
+private:
+	PointerType m_Ptr;
+
+};
+
 template <typename T>
 struct Node {
 	T value;
-	Node* next;
-	Node* prev;
-	Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
+	Node<T>* next;
+	Node<T>* prev;
+	Node() : value(), prev{ nullptr }, next{ nullptr } {}
+	explicit Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
 };
 
 template <typename T>
 class List {
-	Node<T>* head = nullptr;
-	Node<T>* tail = nullptr;
+	Node<T>* head{ nullptr };
+	Node<T>* tail{ nullptr };
 	std::size_t size = 0;
 	void releaseList();
 public:
-	static std::size_t countList;
+	using ValueType = T;
+	using Iterator = ListIterator<List<T>>;
 
 	List() = default;
-	List(const List& newElem);
-	List(std::initializer_list<T> val);
-	~List();
+	List(const List& newElem); // works
+	List(std::initializer_list<T> val); // works
+	~List(); // works
 
-	static void swapList(List& first, List& second);
-	static List& copyList(List& destination, const List& right);
-	static List& moveList(List& destination, List& right);
 
-	void push(const T& value);
-	void pop();
-	void deleteElement_byIndex(const int index, bool reverseIterator);
-	void deleteElement_byIndex(std::vector<int> values);
-	void deleteElement_byValue(const int& val, bool allElem);
-	Node<T>* findElement_byIndex(const int index, bool reverseIterator);
-	std::vector<int> findElement_byValue(const T& val) const;
-	std::size_t sizef() const;
-	void reverse();
-	void printElements() const;
+	static void swapList(List& first, List& second); // works
+	static List& copyList(List& destination, const List& right); // works
 
-	List& operator+=(const List& x);
-	bool operator==(const List& right) const;
+	void push(const T& value); // works
+	void pop(); // works
+	void deleteElement_byIndex(const int index, bool reverseIterator); // works
+	void deleteElement_byIndex(std::vector<int> values); // works
+	void deleteElement_byValue(const int& val, bool allElem); // works
+	Node<T>* findElement_byIndex(const int index, bool reverseIterator); // works
+	std::vector<int> findElement_byValue(const T& val) const; // works
+	std::size_t sizef() const; // works
+	void reverse(); // works
+	void printElements() const; // works
 
-	//------ move constructor -----------------------------------------
-	
-	List(List&& moveElem) noexcept : List() {
+	List& operator+=(const List& x); // works
+	bool operator==(const List& right) const; // works
+	List operator+(const List<T>& right); // works
+	List& operator=(List right); // works
+	List& operator=(List&& right) noexcept;
+
+	List(List&& moveElem) noexcept : List() { // works
 		std::cout << "-- moveConst --" << std::endl;
 		swapList(*this, moveElem);
 	}
-	
-	// ---------------------------------------------
-	List& operator=(List right) {
-		std::cout << "--- copy assignment ---" << std::endl;
-		swapList(*this, right);
-		return *this;
-	}
 
-	// move assignment ------ --------------------------------
-	List& operator=(List&& right) noexcept {
-		std::cout << "--- move assignment ---" << std::endl;
-		releaseList();
-		swapList(*this, right);
-		return *this;
-	}
+
 	/*
-	// --------- implementation is wrong, i dont know how to fix it -------------------------
-	List& operator+(const List<T>& right) {
-		List<T> tempList;
-		for (const Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
-			tempList.push(currentElem->value);
-		}
-		for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
-			tempList.push(currentElem->value);
-		}
-		return tempList;
-	}
-	//--------------------------------------------------------------------------------------------------
+	Iterator begin() {return head;}
+	
+	Iterator end() {return nullptr;}
+	//void testPrint(Iterator i = h
+	*/
+	
+	// --------- does not work ------------------------------------------------------------
 	std::ostream& operator<<(std::ostream& ost, const List<T>& list) {
 		for (const Node* currentElem = list.head; currentElem != nullptr; currentElem = currentElem->next) {
 			ost << currentElem->value << "  ,  " << std::flush;
 		}
 		return ost;
-	}*/
+	}
 };
 
-template <typename T>
-std::size_t List<T>::countList = 0;
 
 template <typename T>
-List<T>::List(const List& newElem) { copyList(*this, newElem); }
+List<T>::List(const List& newElem) {
+	std::cout << "--- insight copy constructor ---" << std::endl;
+	copyList(*this, newElem);
+}
 
 template <typename T>
 List<T>::List(std::initializer_list<T> val) {
 	for (const auto& valTemp : val)
 		push(valTemp);
-	countList++;
 }
 
 template <typename T>
 List<T>::~List() {
+	std::cout << "--- insight destructor ---" << std::endl;
 	releaseList();
 }
+/*
+template <typename T>
+List<T>::List(List&& moveElem) noexcept : List() {
+	std::cout << "-- moveConst --" << std::endl;
+	swapList(*this, moveElem);
+}*/
 
 template <typename T>
 void List<T>::releaseList() {
@@ -109,7 +118,6 @@ void List<T>::releaseList() {
 	while (currendNode) {
 		Node<T>* tempNode = currendNode->next;
 		delete currendNode;
-		//cout << "DELETE " << endl;
 		currendNode = tempNode;
 	}
 	head = nullptr;
@@ -119,6 +127,7 @@ void List<T>::releaseList() {
 
 template <typename T>
 void List<T>::push(const T& value) {
+	std::cout << " --- PUSH ---" << std::endl;
 	Node<T>* temp = new Node<T>(value);
 	if (head == nullptr) {
 		head = temp;
@@ -250,36 +259,25 @@ void List<T>::reverse() {
 	}
 	tempList.releaseList();
 }
-/*
 template <typename T>
 void List<T>::swapList(List<T>& first, List<T>& second) {
 	std::cout << "-- swapFunction --" << std::endl;
-	List<T> temp(std::move(first));
-	first = std::move(second);
-	second = std::move(temp);
-}
-*/
-template <typename T>
-void List<T>::swapList(List<T>& first, List<T>& second) {
-	std::cout << "-- swapFunction --" << std::endl;
-	List<T> temp;
-	moveList(temp, first);
-	moveList(first, second);
-	moveList(second, temp);
-}
-template <typename T>
-List<T>& List<T>::copyList(List<T>& destination, const List<T>& right) {
-	destination.releaseList();
-	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
-		destination.push(currentElem->value);
-	}
-	return destination;
+	std::swap(first.head, second.head);
+	std::swap(first.tail, second.tail);
 }
 
+
 template <typename T>
-List<T>& List<T>::moveList(List<T>& destination, List<T>& right) {
-	copyList(destination, right);
-	right.releaseList();
+List<T>& List<T>::copyList(List<T>& destination, const List<T>& right) {
+	std::cout << "-- copyList --" << std::endl;
+	destination.releaseList();
+	if (right.head != nullptr) {
+		for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+			std::cout << "-- copyList LOOP --- "<< std::endl;
+			destination.push(currentElem->value);
+		}
+
+	}
 	return destination;
 }
 
@@ -294,8 +292,8 @@ void List<T>::printElements() const {
 }
 
 template <typename T>
-List<T>& List<T>::operator+=(const List& x) {
-	for (const Node<T>* currentElem = x.head; currentElem != nullptr; currentElem = currentElem->next) {
+List<T>& List<T>::operator+=(const List& right) {
+	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
 		push(currentElem->value);
 	}
 	size++;
@@ -306,7 +304,6 @@ template <typename T>
 bool List<T>::operator==(const List& right) const {
 	if (size == right.sizef()) {
 		Node<T>* rightTemp = right.head;
-
 		for (auto left = head; left != nullptr; left = left->next, rightTemp = rightTemp->next) {
 			if (left->value != rightTemp->value) { return false; }
 		}
@@ -315,18 +312,28 @@ bool List<T>::operator==(const List& right) const {
 	else { return false; }
 }
 
-/*
 template <typename T>
-List<T>& operator+(List<T> left, List<T> right) {
-	List::Node* temp = new List::Node();
-	for (const Node* currentElem = left.head; currentElem != nullptr; currentElem = currentElem->next) {
-		temp->push(currentElem->value);
+List<T> List<T>::operator+(const List<T>& right){
+	std::cout << "insight operator+ ---------" << std::endl;
+	List<T> temp(*this);
+	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+		temp.push(currentElem->value);
 	}
-	for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
-		temp->push(currentElem->value);
-	}
-	return *temp;
-}*/
+	return temp;
+}
+template <typename T>
+List<T>& List<T>::operator=(List right) {
+	std::cout << "--- copy assignment ---" << std::endl;
+	swapList(*this, right);
+	return *this;
+}
+
+template <typename T>
+List<T>& List<T>::operator=(List&& right) noexcept {
+	std::cout << "--- move assignment ---" << std::endl;
+	swapList(*this, right);
+	return *this;
+}
 
 int main() {
 	List <int> x;
@@ -376,7 +383,6 @@ int main() {
 	std::cout << std::endl;
 	tt.printElements();
 	std::cout << std::endl;
-	std::cout <<"countList == "<< List<int>::countList<< std::endl;
 	std::cout << std::endl;
 	// test deletElement_byIndex(vector) ---------  works -------
 	std::cout << "test deleteElement by indecies VECTOR -----------" << std::endl;
@@ -392,15 +398,24 @@ int main() {
 	List<int> swsw({ 9,9,9,9,9 });
 	sw.printElements();
 	swsw.printElements();
-
+	// works ------------------------------------------------------------
 	std::cout << std::endl;
 	List<int>::swapList(sw, swsw);
 	sw.printElements();
 	swsw.printElements();
-
+	// works ------------------------------------------------------------
 	std::cout << std::endl;
+	std::cout << "--- assignment test -----------" << std::endl;
 	sw = swsw;
 	sw.printElements();
+	std::cout << std::endl;
+
+	// works ------------------------------------------------------------
+	std::cout << "--- operator+ test -----------" << std::endl;
+	List<int> TTT = sw+swsw;
+	std::cout << "--- start -----------" << std::endl;
+	TTT.printElements();
+	std::cout << "--- end -----------" << std::endl;
 
 
 
