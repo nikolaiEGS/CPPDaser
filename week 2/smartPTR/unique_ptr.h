@@ -4,7 +4,6 @@
 
 namespace SMART_PTR {
 	
-	
 	template <typename T, typename F = SMART_PTR::default_deleter<T>>
 	class unique_ptr;
 	template <typename T, typename F = SMART_PTR::default_deleter<T>>
@@ -15,6 +14,8 @@ namespace SMART_PTR {
 	class unique_ptr : public smart_ptr<T> {
 		using custom_deleter_function = F;
 		custom_deleter_function custom_deleter;
+	
+		void __release__() noexcept { custom_deleter(this->ptr); }
 	public:
 
 		friend void swap<T, F>(unique_ptr<T, F>&, unique_ptr<T, F>&);
@@ -22,17 +23,15 @@ namespace SMART_PTR {
 		unique_ptr(T* ptr_ = nullptr, const custom_deleter_function& custom_deleter_= SMART_PTR::default_deleter<T>()) : smart_ptr<T>(ptr_), custom_deleter(custom_deleter_) {}
 		
 		unique_ptr(const unique_ptr<T>&) = delete;
-		unique_ptr& operator=(const unique_ptr<T>&) = delete;
+		unique_ptr& operator=(const unique_ptr&) = delete;
 
 		unique_ptr(unique_ptr<T>&&) noexcept;
 
-		unique_ptr& operator=(unique_ptr<T>&&) noexcept;
+		unique_ptr<T>& operator=(unique_ptr<T>&&) noexcept;
 
-		virtual ~unique_ptr() {
-			custom_deleter(this->ptr);
-		}
+		virtual ~unique_ptr() { __release__(); }
 
-		void reset(T* ptr_) override;
+		void reset(T* ptr_ = nullptr) override;
 	};
 	
 	template <typename TT, typename FF>
@@ -48,7 +47,7 @@ namespace SMART_PTR {
 
 	
 	template<typename T, typename F>
-	inline unique_ptr<T, F>& unique_ptr<T, F>::operator=(unique_ptr<T>&& r) noexcept {
+	inline unique_ptr<T>& unique_ptr<T,F>::operator=(unique_ptr<T>&& r) noexcept {
 		unique_ptr tmp(std::move(r));
 		swap(*this, tmp);
 		return *this;
@@ -56,6 +55,7 @@ namespace SMART_PTR {
 	
 	template<typename T, typename F>
 	inline void unique_ptr<T, F>::reset(T* ptr_) {
+		__release__();
 		this->ptr = ptr_;
 	}
 	

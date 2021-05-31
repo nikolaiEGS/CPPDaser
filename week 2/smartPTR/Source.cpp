@@ -62,15 +62,21 @@ int main() {
 		std::cout << std::endl;
 
 		std::cout << "NAME b: ";
-		b->printName();
+		//b->printName(); // for testing
 		std::cout << std::endl;
 
+		a.reset();
+		a.reset(new A("c", 50));
 		//swap(a, b);
 		int g = 7;
 		//SMART_PTR::unique_ptr<A> copy_a(a);
 	//	SMART_PTR::unique_ptr<A> b;
 
 		//b = a;
+
+		a->printName();
+
+		(*a).printName();
 	}
 
 
