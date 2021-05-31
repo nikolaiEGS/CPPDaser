@@ -1,63 +1,89 @@
-#include "unique_ptr_.h"
-#include "unique_ptr.h"
 #include <iostream>
-//#include <memory>
-#include <functional>
-
-/*
-template <class _Ty, class _Dx>
-class u;
-
-
-template <class _Ty, class _Dx>
-class u<_Ty[], _Dx> { // non-copyable pointer to an array object
-public:
-};
-*/
-
+#include "Mmemory.h"
+#include <memory>
+#include <utility>
 
 class A {
+	int a;
+	std::string name;
 public:
-	~A() { std::cout << "AAAAAAAA\n"; }
+	explicit A(std::string name_, int aa = 0) : name(name_), a(aa) {}
+	~A() { std::cout << std::endl << "destruct: " << name <<std::endl; }
+
+	void printName() const { std::cout << std::endl << "name: " << name << std::endl; }
+	/*
+	A(A&& aa) : A("") {
+		std::swap(a, aa.a);
+		std::swap(name, aa.name);
+	}
+
+	A& operator=(A&& aa) {
+		//a = std::move(aa.a);
+		//name = std::move(aa.name);
+		A tmp(std::move(aa));
+		std::swap(name, tmp.name);
+		std::swap(a, tmp.a);
+		return *this;
+	}
+	*/
 };
+
 int main() {
 
-	//smart_ptr::unique_ptr_<int[], void (*) (int*)> ptr(new int[100], [](int* p) {delete []p;  std::cout << "PPPPPPPPP\n"; });
 
-	
-	//smart_ptr::unique_ptr_<int[]> ptrr(new int[100]);
-
-	//smart_ptr::unique_ptr_<A[], void (*) (A*)> ptr(new A[10], [](A* p) {delete[] p;  std::cout << "PPPPPPPPP\n"; });
+	//A d("David", 5);
+	//A v("VVVVVV", 7);
 
 
+	//d = std::move(v);
+
+	//A dd(std::move(v));
+	//int c = 7;
+
+	{
+		//SMART_PTR::unique_ptr<A, void(*)(A*)> aa(new A, [](A* a) {std::cout << "OPPPPPPPPPPPPPPP\n"; });
+
+		SMART_PTR::unique_ptr<A> a(new A("a", 5));
+		SMART_PTR::unique_ptr<A> b(new A("b", 7));
+		//std::unique_ptr<A> a(new A("a", 5));
+		//std::unique_ptr<A> b(new A("b", 7));
+
+		//SMART_PTR::unique_ptr<int> a(new int(4));
+		//SMART_PTR::unique_ptr<int> b(new int(8));
+
+		//std::unique_ptr<int> a(new int(4));
+		//std::unique_ptr<int> b(new int(8));
+
+		//SMART_PTR::unique_ptr<A> b(std::move(a));
+		a = std::move(b);
+
+		std::cout << "NAME a: ";
+		a->printName();
+		std::cout << std::endl;
+
+		std::cout << "NAME b: ";
+		b->printName();
+		std::cout << std::endl;
+
+		//swap(a, b);
+		int g = 7;
+		//SMART_PTR::unique_ptr<A> copy_a(a);
+	//	SMART_PTR::unique_ptr<A> b;
+
+		//b = a;
+	}
 
 
-	//smart_ptr::default_deleter<int> d;
 
-	//smart_ptr::default_deleter<int>dd(d);
+	std::cout << "after a\n";
 
+	/*
+	std::unique_ptr<A> a(new A);
+	std::unique_ptr<A> b(std::move(a));
+	int c = 5;
+	*/
+	//SMART_PTR::unique_ptr_<A[]> b(new A[10]);
 
-	//d(new int[10]);
-	//dd(new int[10]);
-
-	SMART_PTR::unique_ptr<A> a(new A);
-
-
-	SMART_PTR::unique_ptr<A, void(*)(A*)> aa(new A, [](A* a) {std::cout << "OPPPPPPPPPPPPPPP\n"; });
-
-	//smart_ptr::unique_ptr_<A[], std::function<void(A*)>> ptr_1(new A[10], [](A* p) {delete[] p;  std::cout << "LLLLL\n"; });
-
-//	smart_ptr::unique_ptr_<A[]> ptr_(new A[10]);
-
-	//ptr.reset(new int[10]);
-	// 
-	//std::unique_ptr<A[], std::function<void(A*)>> pp(new A[10], [](A* p) {std::cout << "PPPPooo\n"; });
-	
-	//std::unique_ptr<A[]> pp(new A[10]);
-
-	//std::function<void(int*)> f = smart_ptr::default_deleter<int>();
-	//auto ff(f);
-
-	
+	//SMART_PTR::unique_ptr_<A[], void(*)(A*)> bb(new A[10], [](A* a) {std::cout << "UUUUUUUU\n"; }) ;
 	return 0;
 }

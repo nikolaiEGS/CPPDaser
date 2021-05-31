@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 namespace SMART_PTR {
@@ -30,8 +31,8 @@ namespace SMART_PTR {
 	public:
 		smart_ptr(T* ptr_ = nullptr) : ptr(ptr_) {}
 
-		smart_ptr(const smart_ptr& r) = delete;
-		smart_ptr& operator=(const smart_ptr& r) = delete;
+		//smart_ptr(const smart_ptr& r) = delete;
+		//smart_ptr& operator=(const smart_ptr& r) = delete;
 		smart_ptr(smart_ptr&& r) = delete;
 		smart_ptr& operator=(smart_ptr&& r) = delete;
 
