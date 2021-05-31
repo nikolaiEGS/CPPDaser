@@ -10,9 +10,6 @@ namespace SMART_PTR {
 		template <class T2>
 		default_deleter_(const default_deleter_<T2>&) noexcept {};
 
-		//template <class T2>
-		//default_deleter(default_deleter<T2>&&) noexcept = delete;
-
 		void operator()(T* _Ptr) const noexcept { // delete a pointer array
 			//static_assert(0 < sizeof(_Ty), "can't delete an incomplete type");
 			std::cout << "delete[]";
@@ -30,12 +27,6 @@ namespace SMART_PTR {
 		T* ptr;
 	public:
 		smart_ptr_(T* ptr_ = nullptr) : ptr(ptr_) {}
-/*
-		smart_ptr_(const smart_ptr_& r) = delete;
-		smart_ptr_& operator=(const smart_ptr_& r) = delete;
-		smart_ptr_(smart_ptr_&& r) = delete;
-		smart_ptr_& operator=(smart_ptr_&& r) = delete;
-*/
 		virtual ~smart_ptr_() {}
 
 		T* operator->() { return ptr; }
