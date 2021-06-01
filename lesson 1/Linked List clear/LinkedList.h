@@ -54,6 +54,45 @@ class List {
 	std::size_t size = 0;
 	void releaseList();
 public:
+
+	class const_iterator {
+		const Node<T>* ptr;
+
+	public:
+		const_iterator(const Node<T>* ptr_ = nullptr) : ptr(ptr_) {};
+
+		const const_iterator& operator++() {
+			if (ptr != nullptr) {
+				ptr = ptr->next;
+			}
+
+			return *this;
+		}
+
+		const const_iterator& operator--() {
+			if (ptr != nullptr) {
+				ptr = ptr->prev;
+			}
+
+			return *this;
+		}
+
+		const Node<T>& operator*() { return *ptr; }
+		const Node<T>* operator->() { return ptr; }
+
+		friend bool operator==(const const_iterator& l, const const_iterator& r) {
+			return l.ptr == r.ptr;
+		}
+
+		friend bool operator!=(const const_iterator& l, const const_iterator& r) {
+			return l.ptr != r.ptr;
+		}
+
+	};
+
+
+
+
 	List() = default;
 	List(const List& newElem); // works
 	List(std::initializer_list<T> val); // works
@@ -87,17 +126,19 @@ public:
 
 	List(List&& moveElem) noexcept;
 
-	//ListIterator<T> begin() { return ListIterator<T>(head); }
-	//ListIterator<T> end() { return ListIterator<T>(nullptr); }
+	const_iterator begin() { return const_iterator(head); }
+	const_iterator end() { return const_iterator(tail); }
 
 	void testPrint() {
 		if (head != nullptr) {
-			/*
-			for (ListIterator<T> Iterator = begin(); Iterator != end(); ++Iterator) {
+			
+			for (const_iterator Iterator = begin(); Iterator != end(); ++Iterator) {
 				std::cout << " test   ";
+				std::cout <<  "VALUE *: " << (*Iterator).value <<std::endl;
+				std::cout <<  "VALUE ->: " << Iterator->value << std::endl;
 			}
 			std::cout << std::endl;
-			*/
+			
 		}
 	}
 	

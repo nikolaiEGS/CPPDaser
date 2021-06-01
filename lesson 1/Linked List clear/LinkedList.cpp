@@ -273,6 +273,18 @@ void* List<T>::operator new(size_t count) { //size_t: positiv integer
 	void* p = std::malloc(sizeof(List) * count);
 	return p;
 }
+
+
+
+
+// iterators
+
+
+//template <typename T>
+//bool List<T>::const_iterator::operator==(const List<T>::const_iterator& l, const List<T>::const_iterator& r) {
+//	return 
+//}
+
 #endif
 
 /*

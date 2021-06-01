@@ -17,7 +17,8 @@ int main() {
 
 //	List<int> tt;
 
+	List<int>::const_iterator it;
 
-
+	tt.testPrint();
 	return 0;
 }
