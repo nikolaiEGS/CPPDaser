@@ -139,11 +139,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="shared_ptr.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="unique_ptr.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mmemory.h" />
+    <ClInclude Include="mmemory.h" />
+    <ClInclude Include="shared_ptr.h" />
     <ClInclude Include="shared_ptr_.h" />
     <ClInclude Include="smart_ptr.h" />
     <ClInclude Include="smart_ptr_.h" />

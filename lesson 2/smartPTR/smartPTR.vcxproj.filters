@@ -21,6 +21,9 @@
     <ClCompile Include="unique_ptr.cpp">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
+    <ClCompile Include="shared_ptr.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="unique_ptr_.h">
@@ -38,7 +41,10 @@
     <ClInclude Include="smart_ptr.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Mmemory.h">
+    <ClInclude Include="mmemory.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_ptr.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

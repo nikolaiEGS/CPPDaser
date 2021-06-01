@@ -1,4 +1,7 @@
 #pragma once
+#ifndef SMART_PTR_H
+#define SMART_PTR_H
+
 #include "smart_ptr.h"
 #include <utility>
 
@@ -31,32 +34,11 @@ namespace SMART_PTR {
 
 		virtual ~unique_ptr() noexcept { __release__(); }
 
-		constexpr void reset(T* ptr_ = nullptr) override;
+		void reset(T* ptr_ = nullptr) override;
 	};
 	
-	template <typename TT, typename FF>
-	constexpr void swap<TT, FF>(unique_ptr<TT, FF>& l, unique_ptr<TT, FF>& r) {
-		std::swap(l.custom_deleter, r.custom_deleter);
-		std::swap(l.ptr, r.ptr);
-	}
-
-	template<typename T, typename F>
-	constexpr unique_ptr<T, F>::unique_ptr(unique_ptr<T>&& r) noexcept {
-		swap(*this, r);
-	}
-
-	
-	template<typename T, typename F>
-	constexpr unique_ptr<T>& unique_ptr<T,F>::operator=(unique_ptr<T>&& r) noexcept {
-		unique_ptr tmp(std::move(r));
-		swap(*this, tmp);
-		return *this;
-	}
-	
-	template<typename T, typename F>
-	constexpr void unique_ptr<T, F>::reset(T* ptr_) {
-		__release__();
-		this->ptr = ptr_;
-	}
-	
 }
+
+#include "unique_ptr.cpp"
+
+#endif

@@ -30,7 +30,35 @@ public:
 
 int main() {
 
+	{
+		//SMART_PTR::unique_ptr<A, void(*)(A*)> aa(new A, [](A* a) {std::cout << "OPPPPPPPPPPPPPPP\n"; });
 
+		SMART_PTR::shared_ptr<A> a(new A("a", 5));
+
+		{
+			SMART_PTR::shared_ptr<A> b(a);
+			SMART_PTR::shared_ptr<A> c(new A("c", 5));
+
+			a->printName();
+			b->printName();
+		}
+		a->printName();
+
+
+		std::cout << "------------------\n";
+		SMART_PTR::shared_ptr<int> z(new int);
+		std::cout << "------------------\n";
+		SMART_PTR::shared_ptr<int> zz(new int);
+
+	}
+
+
+
+
+
+
+	// #################### unique_ptr tests ##########################
+	// 
 	//A d("David", 5);
 	//A v("VVVVVV", 7);
 
@@ -39,7 +67,7 @@ int main() {
 
 	//A dd(std::move(v));
 	//int c = 7;
-
+/*
 	{
 		//SMART_PTR::unique_ptr<A, void(*)(A*)> aa(new A, [](A* a) {std::cout << "OPPPPPPPPPPPPPPP\n"; });
 
@@ -91,5 +119,6 @@ int main() {
 	//SMART_PTR::unique_ptr_<A[]> b(new A[10]);
 
 	//SMART_PTR::unique_ptr_<A[], void(*)(A*)> bb(new A[10], [](A* a) {std::cout << "UUUUUUUU\n"; }) ;
+	
 	return 0;
 }
