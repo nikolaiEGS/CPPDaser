@@ -20,7 +20,7 @@ List<T>::List(std::initializer_list<T> val) {
 template <typename T>
 List<T>::List(List&& moveElem) noexcept : List() {
 	std::cout << "-- moveConst --" << std::endl;
-	swapList(*this, moveElem);
+	swap(*this, moveElem);
 }
 
 
@@ -178,8 +178,10 @@ void List<T>::reverse() {
 	}
 	tempList.releaseList();
 }
+
+
 template <typename T>
-void List<T>::swapList(List<T>& first, List<T>& second) {
+void swap(List<T>& first, List<T>& second) {
 	std::swap(first.head, second.head);
 	std::swap(first.tail, second.tail);
 	std::swap(first.size, second.size);
@@ -250,16 +252,18 @@ List<T> List<T>::operator+(const List<T>& right) {
 	return temp;
 }
 template <typename T>
-List<T>& List<T>::operator=(List right) {
+List<T>& List<T>::operator=(const List& right) {
 	std::cout << "--- copy assignment ---" << std::endl;
-	swapList(*this, right);
+
+	List<T> tmp(right);
+	swap(*this, tmp);
 	return *this;
 }
 
 template <typename T>
 List<T>& List<T>::operator=(List&& right) noexcept {
 	std::cout << "--- move assignment ---" << std::endl;
-	swapList(*this, right);
+	swap(*this, right);
 	return *this;
 }
 
@@ -270,11 +274,15 @@ T List<T>::operator[](const int index) {
 }
 template <typename T>
 void* List<T>::operator new(size_t count) { //size_t: positiv integer
-	void* p = std::malloc(sizeof(List) * count);
+	void* p = std::malloc(count); // no need for sizeof(List) 
 	return p;
 }
 
 
+template <typename T>
+void List<T>::operator delete(void* p) {
+	std::free(p);
+}
 
 
 // iterators
@@ -287,12 +295,6 @@ void* List<T>::operator new(size_t count) { //size_t: positiv integer
 
 #endif
 
-/*
-template <typename T>
-void List<T>::operator delete(void* p) {
-	std::free(p);
-}
-*/
 /*
 template <typename T>
 List<T>& List<T>::operator*(List* ptr) {
