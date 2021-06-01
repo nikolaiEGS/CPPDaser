@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Users\nikolaid\source\repos\CPPDaser\week 2\smartPointer\smartPointer\main.cpp(27,59): error C2280: 'smartPtr::unique_ptr<Test,std::function<void (Test *)>>::unique_ptr(const smartPtr::unique_ptr<Test,std::function<void (Test *)>> &)': attempting to reference a deleted function
+C:\Users\nikolaid\source\repos\CPPDaser\week 2\smartPointer\smartPointer\unique_ptr.h(24): message : see declaration of 'smartPtr::unique_ptr<Test,std::function<void (Test *)>>::unique_ptr'
+C:\Users\nikolaid\source\repos\CPPDaser\week 2\smartPointer\smartPointer\unique_ptr.h(24,3): message : 'smartPtr::unique_ptr<Test,std::function<void (Test *)>>::unique_ptr(const smartPtr::unique_ptr<Test,std::function<void (Test *)>> &)': function was explicitly deleted
