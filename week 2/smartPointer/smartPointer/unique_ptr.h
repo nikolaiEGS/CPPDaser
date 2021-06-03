@@ -175,7 +175,7 @@ namespace smartPtr{
 		shared_ptr& operator=(const shared_ptr& assign) { //const shared_ptr&
 			std::cout << "------------ inside operator = ----------- "  << std::endl; //not insight but inside
 			shared_ptr<T,F> tmp(assign);
-			if (*count_ptr > 1) {
+			if (*count_ptr > 1) { // you don't need here if/else case, the same code should be for all cases
 				std::cout << "------------ inside if ----------- " << std::endl;
 				*count_ptr -= 1; //--*count_ptr;
 				ptr = tmp.ptr;
