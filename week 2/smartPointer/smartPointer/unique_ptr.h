@@ -147,7 +147,8 @@ namespace smartPtr{
 		//---------- works ----------------------------
 		~shared_ptr() noexcept { 
 			// test *count_ptr == 1 is useless; you should refactor your code to use only *count_ptr == 0 checks
-			if (*count_ptr-- == 1 || *count_ptr == 0) { delete_ptr(this->ptr); } // why you are not decrementing when *count_ptr == 1 ?
+			if (*count_ptr-- == 1 || *count_ptr == 0) { delete_ptr(this->ptr); } // why you are not decrementing when *count_ptr == 1 ? 
+			//you should delete also count_ptr
 			//else {*count_ptr -= 1;} - else is unnecessary
 		}
 		// ------- works -----------------------------------
@@ -190,7 +191,7 @@ namespace smartPtr{
 		}
 		// ------------ fails ---------------------------
 		shared_ptr& operator=(shared_ptr&& move_ptr) {
-			if (*move_ptr.count_ptr == 1 || *move_ptr.count_ptr == 0) {
+			if (*move_ptr.count_ptr == 1 || *move_ptr.count_ptr == 0) { // if  check is not needed
 				unique_ptr<T, F> tmp(move_ptr); // why unique_ptr inside shared_ptr ?
 				swap(*this, move_ptr);
 			}
