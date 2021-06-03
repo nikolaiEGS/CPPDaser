@@ -141,21 +141,25 @@ namespace smartPtr{
 				count_ptr = new std::size_t(1);
 			}
 			else {
-				count_ptr = new std::size_t(0);
+				count_ptr = new std::size_t(0); // unnecessary, anyway delete nullptr is a safe operation, so you should not handle cases where count_ptr==nullptr separately
 			}
 		}
 		//---------- works ----------------------------
 		~shared_ptr() noexcept { 
-			if (*count_ptr == 1 || *count_ptr == 0) { delete_ptr(this->ptr); }
-			else {*count_ptr -= 1;}
+			// test *count_ptr == 1 is useless; you should refactor your code to use only *count_ptr == 0 checks
+			if (*count_ptr-- == 1 || *count_ptr == 0) { delete_ptr(this->ptr); } // why you are not decrementing when *count_ptr == 1 ?
+			//else {*count_ptr -= 1;} - else is unnecessary
 		}
 		// ------- works -----------------------------------
-		shared_ptr(shared_ptr& copy) {
+		shared_ptr(const shared_ptr& copy) :ptr(copy.ptr), delete_ptr(copy.delete_ptr), count_ptr (copy.count_ptr) { // const shared_ptr& copy
 			std::cout << "------------ COPY CONSTRUCTOR ----------- " << std::endl;
-			ptr = copy.ptr;
+			++* count_ptr;
+			/*
+			ptr = copy.ptr; // initialize these members in initializer list, not in the body of copy ctor
 			delete_ptr = copy.delete_ptr;
 			count_ptr = copy.count_ptr;
-			if (ptr) {*count_ptr += 1;}
+			if (ptr) {*count_ptr += 1;} // instead of *count_ptr += 1; write ++*count_ptr
+			*/
 		}
 		// ------------ fails ---------------------------
 		shared_ptr(shared_ptr&& move_ptr) noexcept {
@@ -168,17 +172,18 @@ namespace smartPtr{
 			std::cout << "count_ptr == " << *count_ptr << std::endl;
 		}
 		// ------------ fails ---------------------------
-		shared_ptr& operator=(shared_ptr& assign) {
-			std::cout << "------------ insight operator = ----------- "  << std::endl;
+		shared_ptr& operator=(const shared_ptr& assign) { //const shared_ptr&
+			std::cout << "------------ inside operator = ----------- "  << std::endl; //not insight but inside
 			shared_ptr<T,F> tmp(assign);
 			if (*count_ptr > 1) {
-				std::cout << "------------ insight if ----------- " << std::endl;
-				*count_ptr -= 1;
+				std::cout << "------------ inside if ----------- " << std::endl;
+				*count_ptr -= 1; //--*count_ptr;
 				ptr = tmp.ptr;
 				delete_ptr = tmp.delete_ptr;
-				count_ptr = tmp.count_ptr;
+				count_ptr = tmp.count_ptr; //correctly handle the value of count_ptr
+				++* count_ptr;
 			}
-			else if (*count_ptr == 1 || *count_ptr == 0) {
+			else if (*count_ptr == 1 || *count_ptr == 0) { // you don't need to test against 0
 				swap(*this, tmp);
 			}
 			return *this;
@@ -191,7 +196,7 @@ namespace smartPtr{
 			}
 		}
 		
-		void swap(shared_ptr& left, shared_ptr& right) {
+		friend void swap(shared_ptr& left, shared_ptr& right) { // why swap takes two arguments but it's not a friend function ? -- by this way swap takes 3 arguments: *this, left, right
 			std::swap(left.ptr, right.ptr);
 			std::swap(left.delete_ptr, right.delete_ptr);
 			std::swap(left.count_ptr, right.count_ptr);
