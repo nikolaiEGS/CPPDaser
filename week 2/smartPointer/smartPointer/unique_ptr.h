@@ -127,7 +127,7 @@ namespace smartPtr{
 		}
 	};
 
-
+	// separate into two files unique_ptr.h and smart_ptr.h
 	template <typename T, typename F = std::function<void(T*)>>
 	class shared_ptr {
 		T* ptr;
@@ -191,9 +191,10 @@ namespace smartPtr{
 		// ------------ fails ---------------------------
 		shared_ptr& operator=(shared_ptr&& move_ptr) {
 			if (*move_ptr.count_ptr == 1 || *move_ptr.count_ptr == 0) {
-				unique_ptr<T, F> tmp(move_ptr);
+				unique_ptr<T, F> tmp(move_ptr); // why unique_ptr inside shared_ptr ?
 				swap(*this, move_ptr);
 			}
+			// you must return a value here
 		}
 		
 		friend void swap(shared_ptr& left, shared_ptr& right) { // why swap takes two arguments but it's not a friend function ? -- by this way swap takes 3 arguments: *this, left, right
