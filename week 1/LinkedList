@@ -2,19 +2,21 @@
 #include<vector>
 #include <stdlib.h>
 #include <cstdlib>
+//#include<list>
 //separate hpp and cpp
 
 template <typename T>
 class List {
+	template <typename T>
 	struct Node {
 		T value;
-		Node* next;
-		Node* prev;
+		Node<T>* next;
+		Node<T>* prev;
 		Node() : value(), prev{ nullptr }, next{ nullptr } {}
 		explicit Node(const T& val) : value{ val }, next{ nullptr }, prev{ nullptr } {}
 	};
-	Node* head{ nullptr };
-	Node* tail{ nullptr };
+	Node<T>* head{ nullptr };
+	Node<T>* tail{ nullptr };
 	std::size_t size = 0;
 	void releaseList(); // works
 	List& copyList(List& destination, const List& right); // works
@@ -24,26 +26,39 @@ public:
 		const Node<T>* ptr;
 	public:
 		const_iterator(const Node<T>* ptr_ = nullptr) : ptr(ptr_) {};
-		const const_iterator& operator++(); // does not work
-		const const_iterator& operator--(); // does not work
-		const Node& operator*() const;
-		const Node* operator->() const;
-		friend bool operator==(const const_iterator& l, const const_iterator& r); // problem with declearing, friend
-		friend bool operator!=(const const_iterator& l, const const_iterator& r); // problem with declearing, friend
+		const_iterator& operator++();
+		const_iterator& operator--(); 
+		const Node<T>& operator*() const;
+		const Node<T>* operator->() const;
+		friend bool operator==(const const_iterator& l, const const_iterator& r); // can not find the problem
+		friend bool operator!=(const const_iterator& l, const const_iterator& r); // can not find the problem
 	};
-
+/*	// will define functions whenn const_iterator class is correct
+	class iterator {
+		const Node<T>* ptr;
+	public:
+		iterator(const Node<T>* ptr_ = nullptr) : ptr(ptr_) {};
+		iterator& operator++();
+		iterator& operator--();
+		Node<T>& operator*() const;
+		Node<T>* operator->() const;
+		friend bool operator==(const iterator& l, const iterator& r); // problem with declearing, friend
+		friend bool operator!=(const iterator& l, const iterator& r); // problem with declearing, friend
+	};
+*/
 	List() = default;
 	List(const List& newElem); // works
 	List(std::initializer_list<T> val); // works
 	~List(); // works
 
-	friend void swap(List& first, List& second); // works
+	template<typename T>
+	friend void swap(List<T>& first, List<T>& second);
 	void push(const T& value); // works
 	void pop(); // works
 	void deleteElement_byIndex(const int index, bool reverseIterator); // works
 	void deleteElement_byIndex(std::vector<int> values); // works
 	void deleteElement_byValue(const int& val, bool allElem); // works
-	Node* findElement_byIndex(const int index, bool reverseIterator); // works
+	Node<T>* findElement_byIndex(const int index, bool reverseIterator); // works
 	std::vector<int> findElement_byValue(const T& val) const; // works
 	std::size_t sizef() const; // works
 	void reverse(); // works
@@ -55,32 +70,35 @@ public:
 	List operator+(const List<T>& right); // works
 	List& operator=(const List& right); // works
 	List& operator=(List&& right) noexcept;
-	T& operator[](const int index); // works, why is return type wrong????
+	T& operator[](const int index); // works
 	void* operator new(const size_t count); // works
 	void operator delete(void* p); // 
 	List& operator*(List* ptr); // works
+	List(List&& moveElem) noexcept : List(); // can not find the problem, 
 
-	List(List&& moveElem) noexcept : List() { // works
-		std::cout << "-- moveConst --" << std::endl;
-		swap(*this, moveElem);
-	}
+	//const_iterator begin() { return const_iterator(head); }
+	//const_iterator end() { return const_iterator(nullptr); }
 
-	const_iterator begin() { return const_iterator(head); }
-	const_iterator end() { return const_iterator(nullptr); }
+	Node<T>* begin() { return head; }
+	const Node<T>* begin() const { return head; }
+	Node<T>* end() { return tail->next; }
+	const Node<T>* end() const { return tail->next; }
 
-// operator ++ does not work -------------------------------------------------------------
+	// works ---------- test function for iterator 
 	void testPrint() {
 		if (head != nullptr) {
-			for (const_iterator Iterator = begin() ; Iterator != end(); Iterator++) {
-				std::cout<< " test   ";
+			for (const_iterator Iterator = begin() ; Iterator != end(); ++Iterator) {
+				std::cout<< " test   "<<std::endl;
+				std::cout << Iterator->value << ",";
 			}
 			std::cout << std::endl;
 		}
 	}
-
+	// --- does not work correct 
 	friend std::ostream& operator<<(std::ostream& ost, const List<T>& list) {
 		if (list.head != nullptr) {
-			for (const_iterator Iterator = list.begin(); Iterator != list.end(); Iterator++) {
+			for (const_iterator Iterator = list.begin(); Iterator != list.end(); ++Iterator) {
+				std::cout << " insight operator<<    " << std::endl;
 				std::cout << Iterator->value << ",";
 			}
 			std::cout << std::endl;
@@ -88,6 +106,8 @@ public:
 		return ost;
 	}
 };
+
+// List -----------------------------------------------------------------------------------------
 template <typename T>
 List<T>::List(const List& newElem) {
 	std::cout << "--- insight copy constructor ---" << std::endl;
@@ -105,18 +125,18 @@ List<T>::~List() {
 	std::cout << "--- insight destructor ---" << std::endl;
 	releaseList();
 }
-/*
+
 template <typename T>
 List<T>::List(List&& moveElem) noexcept : List() {
 	std::cout << "-- moveConst --" << std::endl;
-	swapList(*this, moveElem);
-}*/
+	swap(*this, moveElem);
+}
 
 template <typename T>
 void List<T>::releaseList() {
-	Node* currendNode = head;
+	Node<T>* currendNode = head;
 	while (currendNode) {
-		Node* tempNode = currendNode->next;
+		Node<T>* tempNode = currendNode->next;
 		delete currendNode;
 		currendNode = tempNode;
 	}
@@ -128,7 +148,7 @@ void List<T>::releaseList() {
 template <typename T>
 void List<T>::push(const T& value) {
 	std::cout << " --- PUSH ---" << std::endl;
-	Node* temp = new Node(value);
+	Node<T>* temp = new Node<T>(value);
 	if (head == nullptr) {
 		head = temp;
 		tail = temp;
@@ -149,7 +169,7 @@ void List<T>::pop() {
 template <typename T>
 void List<T>::deleteElement_byIndex(const int index, bool reverseIterator) {
 	if (head != nullptr && index < size && index >= 0) {
-		Node* element = findElement_byIndex(index, reverseIterator);
+		Node<T>* element = findElement_byIndex(index, reverseIterator);
 		if (element->prev != nullptr) {
 			element->prev->next = element->next;
 		}
@@ -196,7 +216,7 @@ void List<T>::deleteElement_byIndex(std::vector<int> values) {
 template <typename T>
 void List<T>::deleteElement_byValue(const int& val, bool allElem) {
 	int countIndex = 0;
-	Node* currentElem = head;
+	Node<T>* currentElem = head;
 
 	while (currentElem != nullptr) {
 		if (currentElem->value == val) {
@@ -212,11 +232,11 @@ void List<T>::deleteElement_byValue(const int& val, bool allElem) {
 }
 
 template <typename T>
-List<T>::Node* List<T>::findElement_byIndex(const int index, bool reverseIterator) {
+List<T>::Node<T>* List<T>::findElement_byIndex(const int index, bool reverseIterator) {
 	if (index < size && index >= 0) {
 		if (reverseIterator == false) {
 			int countIndex = 0;
-			for (Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
+			for (Node<T>* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
 				if (countIndex++ == index) {
 					return currentElem;
 				}
@@ -224,7 +244,7 @@ List<T>::Node* List<T>::findElement_byIndex(const int index, bool reverseIterato
 		}
 		else {
 			int countIndex = size - 1;
-			for (Node* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) {
+			for (Node<T>* currentElem = tail; currentElem != nullptr; currentElem = currentElem->prev) {
 				if (countIndex-- == index) {
 					return currentElem;
 				}
@@ -238,7 +258,7 @@ template <typename T>
 std::vector<int> List<T>::findElement_byValue(const T& val) const {
 	std::vector<int> indecies{};
 	int countIndex = 0;
-	for (const Node* currentElem = head;
+	for (const Node<T>* currentElem = head;
 		currentElem != nullptr; currentElem = currentElem->next, countIndex++) {
 		if (currentElem->value == val) {
 			indecies.push_back(countIndex);
@@ -259,8 +279,9 @@ void List<T>::reverse() {
 	}
 	tempList.releaseList();
 }
+
 template <typename T>
-void List<T>::swap(List<T>& first, List<T>& second) {
+void swap(List<T>& first, List<T>& second) {
 	std::swap(first.head, second.head);
 	std::swap(first.tail, second.tail);
 	std::swap(first.size, second.size);
@@ -271,7 +292,7 @@ template <typename T>
 List<T>& List<T>::copyList(List<T>& destination, const List<T>& right) {
 	destination.releaseList();
 	if (right.head != nullptr) {
-		for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+		for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
 			destination.push(currentElem->value);
 		}
 	}
@@ -281,7 +302,7 @@ List<T>& List<T>::copyList(List<T>& destination, const List<T>& right) {
 template <typename T>
 void List<T>::printElements() const {
 	if (head != nullptr) {
-		for (const Node* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
+		for (const Node<T>* currentElem = head; currentElem != nullptr; currentElem = currentElem->next) {
 			std::cout << currentElem->value << " , ";
 		}
 		std::cout << std::endl;
@@ -290,7 +311,7 @@ void List<T>::printElements() const {
 
 template <typename T>
 List<T>& List<T>::operator+=(const List& right) {
-	for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
 		push(currentElem->value);
 	}
 	size += right.size;
@@ -300,7 +321,7 @@ List<T>& List<T>::operator+=(const List& right) {
 template <typename T>
 bool List<T>::operator==(const List& right) const {
 	if (size == right.sizef()) {
-		Node* rightTemp = right.head;
+		Node<T>* rightTemp = right.head;
 		for (auto left = head; left != nullptr; left = left->next, rightTemp = rightTemp->next) {
 			if (left->value != rightTemp->value) { return false; }
 		}
@@ -312,7 +333,7 @@ bool List<T>::operator==(const List& right) const {
 template <typename T>
 bool List<T>::operator!=(const List& right) const {
 	if (size == right.sizef()) {
-		Node* rightTemp = right.head;
+		Node<T>* rightTemp = right.head;
 		for (auto left = head; left != nullptr; left = left->next, rightTemp = rightTemp->next) {
 			if (left->value != rightTemp->value) { return true; }
 		}
@@ -325,7 +346,7 @@ template <typename T>
 List<T> List<T>::operator+(const List<T>& right) {
 	std::cout << "insight operator+ ---------" << std::endl;
 	List<T> temp(*this);
-	for (const Node* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
+	for (const Node<T>* currentElem = right.head; currentElem != nullptr; currentElem = currentElem->next) {
 		temp.push(currentElem->value);
 	}
 	return temp;
@@ -347,7 +368,7 @@ List<T>& List<T>::operator=(List&& right) noexcept {
 
 template <typename T>
 T& List<T>::operator[](const int index) {
-	Node* eleme = findElement_byIndex(index, false);
+	Node<T>* eleme = findElement_byIndex(index, false);
 	return eleme->value;
 }
 template <typename T>
@@ -368,7 +389,8 @@ List<T>& List<T>::operator*(List* ptr) {
 	tempList.tail = ptr->tail;
 	return tempList;
 }
-/// iterator -----------------
+/// const_iterator -----------------
+
 template <typename T>
 bool List<T>::const_iterator::operator==(const List<T>::const_iterator& l, const List<T>::const_iterator& r) {
 	return l.ptr == r.ptr;
@@ -380,13 +402,14 @@ bool List<T>::const_iterator::operator!=(const List<T>::const_iterator& l, const
 }
 
 template <typename T>
-const List<T>::Node& List<T>::const_iterator::operator*() const { return *ptr; }
+const List<T>::Node<T>& List<T>::const_iterator::operator*() const { return *ptr; }
 
 template <typename T>
-const List<T>::Node* List<T>::const_iterator::operator->() const { return ptr; }
+const List<T>::Node<T>* List<T>::const_iterator::operator->() const { return ptr; }
+
 
 template <typename T>
-const List<T>::const_iterator& List<T>::const_iterator::operator++() {
+List<T>::const_iterator& List<T>::const_iterator::operator++() {
 	if (ptr != nullptr) {
 		ptr = ptr->next;
 	}
@@ -394,16 +417,16 @@ const List<T>::const_iterator& List<T>::const_iterator::operator++() {
 }
 
 template <typename T>
-const List<T>::const_iterator& List<T>::const_iterator::operator--() {
+List<T>::const_iterator& List<T>::const_iterator::operator--() {
 	if (ptr != nullptr) {
 		ptr = ptr->prev;
 	}
 	return *this;
 }
-//-----------------------------------------------------
+// iterator -----------------------------------------------------
 
 int main() {
-	List<int> x;
+	/*List<int> x;
 	//List <int> y(x);
 	List<int> k;
 	k.push(4);
@@ -422,6 +445,12 @@ int main() {
 	x.push(3);
 	x.push(9);
 	x.printElements();
+	*//*
+	std::list<int> newTest({ 22,22,22,22,22,22 });
+	for (std::list<int>::const_iterator i = newTest.begin(); i != newTest.end(); ++i) {
+		std::cout << *i << std::endl;
+	}*/
+
 
 	std::cout << std::endl;
 
@@ -498,6 +527,7 @@ int main() {
 	newList->printElements();
 	std::cout << "--- test print iterator -----------" << std::endl;
 	newList->testPrint();
+	std::cout << newList << std::endl;
 
 	
 
