@@ -84,7 +84,7 @@ struct Test {
 	Test() = default;
 	Test(int nb) : A(nb){}
 	~Test() {
-		//std::cout << "DELETE -- Test destructor"<<std::endl;
+		std::cout << "DELETE -- Test destructor"<<std::endl;
 
 	}
 	void print() {
@@ -96,6 +96,7 @@ struct Test {
 };
 
 int main() {
+	/*
 // -------- unique ptr ----------------------------------------------------------------------------------------
 	std::unique_ptr<Test> ptr(new Test());
 	std::unique_ptr<Test[]> arr(new Test[20]);
@@ -105,19 +106,45 @@ int main() {
 	test->print();
 	(*test).print();
 	//test.reset();
-	unique_ptr<Test, std::function<void(Test*)>> tt(new Test, [](Test* XX) { /*delete[] XX;*/ std::cout << "pointerFunction called" << std::endl; });
+	smartPtr::unique_ptr<Test, std::function<void(Test*)>> tt(new Test, [](Test* XX) { /*delete[] XX;*/ // std::cout << "pointerFunction called" << std::endl; });
 	//std::cout << "print member string: "<<tt->A << std::endl;
-	unique_ptr<Test, std::function<void(Test*)>> ttt;
-	//ttt = test;
+	//smartPtr::unique_ptr<Test, std::function<void(Test*)>> ttt;
+	//ttt = (std::move(tt));
 	//tt = test;
 	
 // -------- shared ptr ----------------------------------------------------------------------------------------	
-	shared_ptr<Test, std::function<void(Test*)>> cc(new Test(999));
-	shared_ptr<Test, std::function<void(Test*)>> zz;
-	shared_ptr<Test, std::function<void(Test*)>> gg(zz);
-	shared_ptr<Test, std::function<void(Test*)>> ff(new Test(1111));
-	shared_ptr<Test, std::function<void(Test*)>> jj(std::move(ff));
-	jj = std::move(cc);
+	
+	smartPtr::shared_ptr<Test> cc(new Test(999));
+	
+	
+	smartPtr::shared_ptr<Test, std::function<void(Test*)>> zz;
+	{
+		smartPtr::shared_ptr<Test, std::function<void(Test*)>> gg(cc);
+		gg->print();
+	}
+	cc->print();
+
+	//smartPtr::shared_ptr<Test, std::function<void(Test*)>> r(cc);
+	smartPtr::shared_ptr<Test, std::function<void(Test*)>> ff(new Test(1111));
+	
+
+	cc = ff; // here count_ptr is wrong
+	cc->print();
+	ff->print();
+	/*smartPtr::shared_ptr<Test, std::function<void(Test*)>> jj(std::move(ff));
+	ff.showCount();
+	//ff = gg;
+	cc.showCount();
+	ff.showCount();
+	*/
+
+	//gg.showCount();
+
+	//smartPtr::shared_ptr<Test, std::function<void(Test*)>> nn(cc);
+	//std::cout << gg->A << std::endl;
+	//gg.showCount();
+
+
 
 	return 0;
 }

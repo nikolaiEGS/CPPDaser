@@ -127,7 +127,7 @@ namespace smartPtr{
 		}
 	};
 
-	// separate into two files unique_ptr.h and smart_ptr.h
+
 	template <typename T, typename F = std::function<void(T*)>>
 	class shared_ptr {
 		T* ptr;
@@ -137,65 +137,56 @@ namespace smartPtr{
 		// ----------- works -------------------------------------------------
 		shared_ptr(T* ptr_ = nullptr, F delete_ptr_ = [](T* ptr_) { delete ptr_; }) :
 			 ptr(ptr_), delete_ptr(delete_ptr_) {
-			if (ptr) {
-				count_ptr = new std::size_t(1);
-			}
-			else {
-				count_ptr = new std::size_t(0); // unnecessary, anyway delete nullptr is a safe operation, so you should not handle cases where count_ptr==nullptr separately
-			}
+			count_ptr = ptr_ == nullptr ? new std::size_t(0) : new std::size_t(1);
+
 		}
 		//---------- works ----------------------------
-		~shared_ptr() noexcept { 
-			// test *count_ptr == 1 is useless; you should refactor your code to use only *count_ptr == 0 checks
-			if (*count_ptr-- == 1 || *count_ptr == 0) { delete_ptr(this->ptr); } // why you are not decrementing when *count_ptr == 1 ? 
-			//you should delete also count_ptr
-			//else {*count_ptr -= 1;} - else is unnecessary
+		~shared_ptr() noexcept {
+
+			if (--*count_ptr == 0) { 
+				delete_ptr(this->ptr); 
+				delete (count_ptr);
+			}
 		}
 		// ------- works -----------------------------------
 		shared_ptr(const shared_ptr& copy) :ptr(copy.ptr), delete_ptr(copy.delete_ptr), count_ptr (copy.count_ptr) { // const shared_ptr& copy
 			std::cout << "------------ COPY CONSTRUCTOR ----------- " << std::endl;
 			++* count_ptr;
-			/*
-			ptr = copy.ptr; // initialize these members in initializer list, not in the body of copy ctor
-			delete_ptr = copy.delete_ptr;
-			count_ptr = copy.count_ptr;
-			if (ptr) {*count_ptr += 1;} // instead of *count_ptr += 1; write ++*count_ptr
-			*/
 		}
 		// ------------ fails ---------------------------
-		shared_ptr(shared_ptr&& move_ptr) noexcept {
+		shared_ptr(shared_ptr&& move_ptr) noexcept : shared_ptr() {
+			swap(*this, move_ptr);
+			/*
 			if (*move_ptr.count_ptr == 1 || *move_ptr.count_ptr == 0) {
 				swap(*this, move_ptr);
 			}
+			*/
 		}
-
+		constexpr std::size_t count() const { return *count_ptr; }
 		void showCount() {
 			std::cout << "count_ptr == " << *count_ptr << std::endl;
 		}
 		// ------------ fails ---------------------------
 		shared_ptr& operator=(const shared_ptr& assign) { //const shared_ptr&
 			std::cout << "------------ inside operator = ----------- "  << std::endl; //not insight but inside
+
 			shared_ptr<T,F> tmp(assign);
-			if (*count_ptr > 1) { // you don't need here if/else case, the same code should be for all cases
-				std::cout << "------------ inside if ----------- " << std::endl;
-				*count_ptr -= 1; //--*count_ptr;
-				ptr = tmp.ptr;
-				delete_ptr = tmp.delete_ptr;
-				count_ptr = tmp.count_ptr; //correctly handle the value of count_ptr
-				++* count_ptr;
-			}
-			else if (*count_ptr == 1 || *count_ptr == 0) { // you don't need to test against 0
-				swap(*this, tmp);
-			}
+			swap(*this, tmp);
 			return *this;
 		}
 		// ------------ fails ---------------------------
 		shared_ptr& operator=(shared_ptr&& move_ptr) {
-			if (*move_ptr.count_ptr == 1 || *move_ptr.count_ptr == 0) { // if  check is not needed
-				unique_ptr<T, F> tmp(move_ptr); // why unique_ptr inside shared_ptr ?
+
+			shared_ptr<T, F> tmp(std::move(move_ptr));
+			swap(*this, tmp);
+			/*
+			if (*move_ptr.count_ptr == 1 || *move_ptr.count_ptr == 0) {
+				shared_ptr<T, F> tmp(move_ptr); // why unique_ptr inside shared_ptr ?
 				swap(*this, move_ptr);
 			}
-			// you must return a value here
+			*/
+			return *this;
+			// you must return a value here 
 		}
 		
 		friend void swap(shared_ptr& left, shared_ptr& right) { // why swap takes two arguments but it's not a friend function ? -- by this way swap takes 3 arguments: *this, left, right
