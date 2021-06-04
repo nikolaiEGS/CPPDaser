@@ -39,22 +39,15 @@ void unique_ptr<T, F>::reset(T* t) {
 
 // ------------ SHARED POINTER ------------------------------
 template <typename T, typename F>
-shared_ptr<T,F>::shared_ptr(T* ptr_r, F delete_ptr_) :
-	ptr(ptr_), delete_ptr(delete_ptr_) {
-	count_ptr = ptr_ == nullptr ? new std::size_t(0) : new std::size_t(1);
-}
-
-template <typename T, typename F>
 shared_ptr<T, F>::~shared_ptr() noexcept {
-	if (-- * count_ptr == 0) { // what is if count_ptr == 0??
+	if (*count_ptr == 0 || --*count_ptr == 0) { 
 		delete_ptr(this->ptr);
-		delete (count_ptr); // why ()
+		delete count_ptr;
 	}
 }
 template <typename T, typename F>
 shared_ptr<T,F>::shared_ptr(const shared_ptr& copy) : ptr(copy.ptr), delete_ptr(copy.delete_ptr), count_ptr(copy.count_ptr) {
-	std::cout << "------------ COPY CONSTRUCTOR ----------- " << std::endl;
-	if (ptr) { ++* count_ptr; }
+		if (ptr) { ++* count_ptr; }
 }
 
 template <typename T, typename F>
@@ -68,7 +61,6 @@ constexpr std::size_t shared_ptr<T,F>::count() const { return *count_ptr; }
 template <typename T, typename F>
 shared_ptr<T,F>& shared_ptr<T, F>::operator=(shared_ptr& assign) { // what is fi count_prt is 0 ?? count_ptr can not be negative, or??
 	shared_ptr<T, F> tmp(assign);
-	--* count_ptr;
 	swap(*this, tmp);
 	return *this;
 }

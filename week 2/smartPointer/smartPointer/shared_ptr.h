@@ -7,17 +7,18 @@ class shared_ptr {
 	F delete_ptr;
 	std::size_t* count_ptr;
 public:
-	// ----------- works -------------------------------------------------
 	shared_ptr(T* ptr_ = nullptr, F delete_ptr_ = [](T* ptr_) { delete ptr_; }) :
-		ptr(ptr_), delete_ptr(delete_ptr_);
+		count_ptr{ (ptr_ == nullptr) ? new std::size_t(0) : new std::size_t(1) },
+		ptr{ ptr_ }, delete_ptr{ delete_ptr_ }{}
 	~shared_ptr() noexcept;
-	shared_ptr(const shared_ptr& copy) : ptr(copy.ptr), delete_ptr(copy.delete_ptr), count_ptr(copy.count_ptr);
-	shared_ptr(shared_ptr&& move_ptr) noexcept : shared_ptr(); // works, but problem is arising  becouse of definition outside of the class
+	shared_ptr(const shared_ptr& copy);
+	shared_ptr(shared_ptr&& move_ptr) noexcept;
 	constexpr std::size_t count() const;
 	shared_ptr& operator=(shared_ptr& assign);
 	shared_ptr& operator=(shared_ptr&& move_ptr) noexcept;
 	T* operator->() { return ptr; }
 	T& operator*() { return *ptr; }
-	template <typename T, typename F = std::function<void(T*)>>
+
+	template <typename T, typename F>
 	friend void swap(shared_ptr<T,F>& left, shared_ptr<T,F>& right);
 };

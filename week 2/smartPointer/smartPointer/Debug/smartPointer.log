@@ -1,4 +1,2 @@
 ﻿  main.cpp
-C:\Users\nikolaid\source\repos\CPPDaser\week 2\smartPointer\smartPointer\unique_ptr.h(14,59): error C2760: syntax error: unexpected token ';', expected '{'
-C:\Users\nikolaid\source\repos\CPPDaser\week 2\smartPointer\smartPointer\unique_ptr.h(20): message : see reference to class template instantiation 'unique_ptr<T,F>' being compiled
-C:\Users\nikolaid\source\repos\CPPDaser\week 2\smartPointer\smartPointer\unique_ptr.h(14,1): fatal error C1903: unable to recover from previous error(s); stopping compilation
+  smartPointer.vcxproj -> C:\Users\nikolaid\source\repos\CPPDaser\week 2\smartPointer\Debug\smartPointer.exe
