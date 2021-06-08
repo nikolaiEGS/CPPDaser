@@ -3,61 +3,73 @@
 #include <vector>
 #include <iostream>
 #include <functional>
+#include <map>
 
 enum FunctionType {VIRTUAL, NON_VIRTUAL};
 
-
-std::string ff() {
-	return "AAAA";
-}
-
 class Employee {
-	//std::string info() const noexcept { return "Employee: " + name + ',' + std::to_string(age); }
+	
 protected:
 	std::string name;
 	std::size_t age;
 
-	//template <typename T>
-	//std::vector<std::function<std::string(FunctionType)>>* vtable;
-	//std::vector<std::string(Employee::*)()>* vtable;
+	using fpType = std::string(Employee::*)();
+	std::map<std::string, fpType>* vtable;
+
+	std::string info_() { return name + ',' + std::to_string(age); }
+	std::string name_() { return name; }
 public:
-	typedef std::string(Employee::* fp)();
 
-//	fp f;
-	std::string info() { return "Employee: " + name + ',' + std::to_string(age); }
-	std::vector<fp>* vtable;
-
-	Employee(std::string name_ = std::string(), std::size_t age_ = 0) : name(name_), age(age_), vtable (new std::vector<fp>) {
-		//vtable->push_back(ff);
-		//vtable->push_back(&Employee::info);
-		vtable->push_back(&Employee::info);
+	Employee(std::string name_ = "Employee Name", std::size_t age_ = 20) : name(name_), age(age_), vtable (new std::map<std::string, fpType>) {
+		(*vtable)["v_get_info"] = &Employee::info_;
+		(*vtable)["v_get_name"] = &Employee::name_;
 	}
 	
-	//virtual std::size_t get_age() const noexcept { std::cout << "EMPLOYEE: get_age";  return age; }
-	//virtual std::string get_name() const noexcept { std::cout << "EMPLOYEE: get_name";  return name; }
+	virtual ~Employee() {
+		delete vtable;
+	}
+	
 
 	virtual std::string get_info() { 
 		//std::cout << "EMPLOYEE: get_info"; 
-		return info();
+		return info_();
+	}
+
+	virtual std::string get_name() {
+		return name_();
 	}
 
 	std::string v_get_info(FunctionType type) {
 		if (type == FunctionType::VIRTUAL) {
-			// find from vtable
-	//		return ((*this).*f)();
-			//return ((*this).*vtable)[0]();
-
-		
-			for (const auto& function : *vtable) {
-				if (function) {
-					return ((*this).*function)();
-					//return "AAA";
-				}
-			}
-			
+			const auto& function = vtable->find("v_get_info")->second;
+			return ((*this).*function)();
 		}
 		else {
-			return info();
+			return info_();
 		}
+	}
+
+	std::string v_get_name(FunctionType type) {
+		if (type == FunctionType::VIRTUAL) {
+			const auto& function = vtable->find("v_get_name")->second;
+			return ((*this).*function)();
+		}
+		else {
+			return name_();
+		}
+	}
+
+	std::string friend _info(Employee& e) {
+		return e.info_();
+	}
+};
+
+class Manager : public Employee {
+	std::string level;
+	std::string info_() { return name + ',' + std::to_string(age) + ' ' + level; }
+public:
+	Manager(std::string name_ = "Manager Name", std::size_t age_ = 20, std::string level_ = "top") : Employee(name_, age_), level(level_) {
+		(*vtable)["v_get_info"] = &Manager::info_;
+		(*vtable)["v_get_name"] = &Employee::name_;
 	}
 };
