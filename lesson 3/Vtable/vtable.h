@@ -31,7 +31,6 @@ public:
 	
 
 	virtual std::string get_info() { 
-		//std::cout << "EMPLOYEE: get_info"; 
 		return info_();
 	}
 
@@ -66,10 +65,18 @@ public:
 
 class Manager : public Employee {
 	std::string level;
+
 	std::string info_() { return name + ',' + std::to_string(age) + ' ' + level; }
 public:
+	using Employee::name_;
+
 	Manager(std::string name_ = "Manager Name", std::size_t age_ = 20, std::string level_ = "top") : Employee(name_, age_), level(level_) {
-		(*vtable)["v_get_info"] = &Manager::info_;
-		(*vtable)["v_get_name"] = &Employee::name_;
+		(*vtable)["v_get_info"] = reinterpret_cast<std::string(Employee::*)()>(&Manager::info_); // override
 	}
+
+	std::string get_info() override {
+		return info_();
+	}
+
+
 };
