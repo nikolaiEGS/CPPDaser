@@ -1,7 +1,5 @@
 #pragma once
 #include <string>
-#include <vector>
-#include <iostream>
 #include <functional>
 #include <map>
 
@@ -38,6 +36,14 @@ public:
 		return name_();
 	}
 
+	std::string get_info_nv() {
+		return info_();
+	}
+
+	std::string get_name_nv() {
+		return name_();
+	}
+
 	std::string v_get_info(FunctionType type) {
 		if (type == FunctionType::VIRTUAL) {
 			const auto& function = vtable->find("v_get_info")->second;
@@ -58,9 +64,6 @@ public:
 		}
 	}
 
-	std::string friend _info(Employee& e) {
-		return e.info_();
-	}
 };
 
 class Manager : public Employee {
@@ -70,13 +73,11 @@ class Manager : public Employee {
 public:
 	using Employee::name_;
 
-	Manager(std::string name_ = "Manager Name", std::size_t age_ = 20, std::string level_ = "top") : Employee(name_, age_), level(level_) {
+	Manager(std::string name_ = "Manager Name", std::size_t age_ = 25, std::string level_ = "top") : Employee(name_, age_), level(level_) {
 		(*vtable)["v_get_info"] = reinterpret_cast<std::string(Employee::*)()>(&Manager::info_); // override
 	}
 
 	std::string get_info() override {
 		return info_();
 	}
-
-
 };
