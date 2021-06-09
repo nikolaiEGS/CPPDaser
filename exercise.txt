@@ -5,7 +5,7 @@
 
 
 // { 2, 3, 5, 6 };
-
+/*
 void func(int* a, int* b, int size) {
     for (int i = 0; i < size; ++i) {
         int tmp = 1;
@@ -16,19 +16,36 @@ void func(int* a, int* b, int size) {
        }
         b[i] = tmp;
     }
-    for (int i = 0; i < size; i++) {
-        std::cout << b[i] << std::endl;
+
+}
+*/
+
+// I had only the idea to recall the function. But in this way there will be the same work of n*n.
+// at this moment I have no other idea, it seems to me, that n*n is necessary to come to the result.
+
+void func(int* a, int* b, int size, int i) { 
+    int tmp = 1;
+    int k = i;
+    for (int j = 0; j < size; ++j) {
+        if (j != k) { tmp *= a[j]; }
+    }
+    b[k] = tmp;
+    if (k < size){
+        func(a, b, size, ++k);
     }
 }
-
-
 
 int main(){
     int size = 4;
     int a[4] = { 2, 3, 5, 6 };
-    int b[4] = { 0 };
+    int b[4] = { 0 };	
+    int k = 0;
 
-    func(a, b, size);
+    func(a, b, size, k);
+
+    for (int i = 0; i < size; i++) {
+        std::cout << b[i] << std::endl;
+    }
 
 	return 0;
 }
