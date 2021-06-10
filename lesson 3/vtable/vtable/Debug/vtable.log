@@ -1,0 +1,6 @@
+﻿  Source.cpp
+C:\Users\nikolaid\source\repos\CPPDaser\lesson 3\vtable\vtable\vtable.h(83,1): error C2440: '=': cannot convert from 'std::string (__thiscall Manager::* )(void)' to 'std::basic_string<char,std::char_traits<char>,std::allocator<char>> (__thiscall Employee::* )(void)'
+C:\Users\nikolaid\source\repos\CPPDaser\lesson 3\vtable\vtable\vtable.h(83,33): message : Cast from base to derived requires dynamic_cast or static_cast
+C:\Users\nikolaid\source\repos\CPPDaser\lesson 3\vtable\vtable\vtable.h(84,1): error C2248: 'Employee::name_': cannot access protected member declared in class 'Employee'
+C:\Users\nikolaid\source\repos\CPPDaser\lesson 3\vtable\vtable\vtable.h(19): message : see declaration of 'Employee::name_'
+C:\Users\nikolaid\source\repos\CPPDaser\lesson 3\vtable\vtable\vtable.h(9): message : see declaration of 'Employee'
