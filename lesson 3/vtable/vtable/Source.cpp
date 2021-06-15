@@ -9,10 +9,10 @@ int main() {
 	Employee* e = &ee;
 	Employee* m = &mm;
 
-	assert(ee.v_get_info(FunctionType::NON_VIRTUAL) == ee.get_info_nv());
+/*	assert(ee.v_get_info(FunctionType::NON_VIRTUAL) == ee.get_info_nv());
 	assert(ee.v_get_name(FunctionType::NON_VIRTUAL) == ee.get_name_nv());
 	assert(mm.v_get_info(FunctionType::NON_VIRTUAL) == mm.get_info_nv());
-	assert(mm.v_get_name(FunctionType::NON_VIRTUAL) == mm.get_name_nv());
+	assert(mm.v_get_name(FunctionType::NON_VIRTUAL) == mm.get_name_nv());*/
 
 
 	assert(e->v_get_info(FunctionType::VIRTUAL) == e->get_info());
