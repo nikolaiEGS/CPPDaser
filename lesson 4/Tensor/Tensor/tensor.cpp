@@ -1,11 +1,11 @@
 #include "tensor.h"
 #include "Exception.h"
-
-Tensor1D::Tensor1D(std::initializer_list<double> data_, ORIENTATION m_n_)
+/*
+Tensor1D::Tensor1D(std::initializer_list<double> data_, Orientation m_n_)
 	: data{ new double[data_.size()]() }, size{ data_.size() } {
 
 	//shape((m_n_ == HORIZONTAL) ? {1, data_.size()} : {data_.size(), 1 });
-	if (m_n_ == ORIENTATION::HORIZONTAL) {
+	if (m_n_ == Orientation::HORIZONTAL) {
 		shape[0] = 1;
 		shape[1] = data_.size();
 	}
@@ -79,26 +79,27 @@ void Tensor1D::printElements(){
 	}
 	std::cout << std::endl;
 }
-
+*/
 /// ////////////////////////////////////////////////////
 
-Tensor2D::Tensor2D(std::initializer_list<std::initializer_list<double>> data_, ORIENTATION m_n_) {
+Tensor2D::Tensor2D(std::initializer_list<std::initializer_list<double>> data_, Orientation m_n_) {
 	std::size_t row, column;
 
 	auto* it = data_.begin();
 	std::size_t in_size = it->size(); // {{in_size}, {in_size}}
-
-	while (it != data_.end()) {
-		++it;
-		if (in_size == it->size()) {
-			in_size = it->size();
+	
+	while (++it != data_.end()) {
+		try {
+			if (in_size != it->size()) {
+				throw Exception(" !!!!!! wrong size !!!!!!\n");
+			}
 		}
-		else {
-			//throw exception sizeError
+		catch (Exception& e) {
+			std::cout << e.getMessage() << std::endl;
 		}
 	}
-
-	if (m_n_ == ORIENTATION::HORIZONTAL) {
+	
+	if (m_n_ == Orientation::HORIZONTAL) {
 		row = data_.size();
 		column = in_size;
 	}
@@ -123,6 +124,40 @@ Tensor2D::Tensor2D(std::initializer_list<std::initializer_list<double>> data_, O
 	}
 }
 
+Tensor2D::~Tensor2D() {
+	std::size_t row = shape[0];
+	for (std::size_t i = 0; i < row; ++i) {
+		delete[] data[i];
+	}
+	delete[] data;
+}
+
+Tensor2D::Tensor2D(const Tensor2D& copyObj) {
+	shape = copyObj.shape;
+	std::size_t row = shape[0];
+	std::size_t column = shape[1];
+
+	data = new double* [row];
+	for (std::size_t i = 0; i < row; ++i) {
+		data[i] = new double[column];
+	}
+
+	for (std::size_t i = 0; i < row; ++i) {
+		for (std::size_t k = 0; k < column; ++k) {
+			data[i][k] = copyObj.data[i][k];
+		}
+	}
+}
+
+Tensor2D::Tensor2D(Tensor2D&& moveObj) : Tensor2D() {
+	swap(*this, moveObj);
+}
+
+void swap(Tensor2D& left, Tensor2D& right) {
+	std::swap(left.data, right.data);
+	std::swap(left.shape, right.shape);
+}
+
 void Tensor2D::printElements() {
 	std::size_t row = shape[0];
 	std::size_t column = shape[1];
@@ -133,5 +168,57 @@ void Tensor2D::printElements() {
 		}
 		std::cout << std::endl;
 	}
+}
 
+Tensor2D& Tensor2D::operator=(const Tensor2D&copyAss) {
+	Tensor2D tmp(copyAss);
+	swap(*this, tmp);
+	return *this;
+}
+
+Tensor2D& Tensor2D::operator=(Tensor2D&& moveAss) {
+	swap(*this, moveAss);
+	return *this;
+}
+
+std::array<std::size_t, 2> Tensor2D::getShape() {
+	return shape;
+}
+
+void Tensor2D::transpose() {
+	Tensor2D tmp;
+	std::size_t row_trans = shape[1];
+	std::size_t column_trans = shape[0];
+	
+	tmp.data = new double* [row_trans];
+	for (std::size_t i = 0; i < row_trans; ++i) {
+		tmp.data[i] = new double[column_trans];
+	}
+	
+	std::size_t row = shape[0];
+	std::size_t column = shape[1];
+
+	for (std::size_t i = 0; i < row; ++i) {
+		std::cout << "++++ insigt for 1 ++++" << std::endl;
+		for (std::size_t k = 0; k < column; ++k) {
+			std::cout << "++++ insigt for 2 ++++" << std::endl;
+			tmp.data[k][i] = data[i][k];
+		}
+	}
+	swap(*this, tmp);
+}
+
+std::vector<double> Tensor2D::flatten() {
+	std::vector<double> flattend;
+
+	std::size_t row = shape[0];
+	std::size_t column = shape[1];
+
+	for (std::size_t i = 0; i < row; ++i) {
+		for (std::size_t k = 0; k < column; ++k) {
+			double tmp = data[i][k];
+			flattend.push_back(tmp);
+		}
+	}
+	return flattend;
 }

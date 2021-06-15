@@ -5,25 +5,25 @@
 #include <algorithm>
 #include <array>
 
-enum ORIENTATION { HORIZONTAL, VERTICAL };
+enum Orientation { HORIZONTAL, VERTICAL };
 
 class Tensor {
 public:
 	virtual ~Tensor() noexcept {}
+
 	virtual std::array<std::size_t, 2> getShape() = 0;
 	virtual std::vector<double> flatten() = 0;
 	virtual void transpose() = 0;
 	virtual void printElements() = 0;
 };
 
-class Tensor1D : public Tensor {
+/*class Tensor1D : public Tensor {
 	double* data;
 	std::size_t size;
-	std::array<std::size_t, 2> shape; // shape[0] = row, shape[1] = column;
+	std::array<std::size_t, 2> shape; // shape[0] = row, shape[1] = column; shouldnt we change the arry to two size_t??
 public:
-	
 	Tensor1D() : data{ nullptr }, size{ 0 }, shape{0}{}
-	Tensor1D(std::initializer_list<double> data_, ORIENTATION m_n_ = HORIZONTAL ); // works 
+	Tensor1D(std::initializer_list<double> data_, Orientation m_n_ = HORIZONTAL ); // works 
 	Tensor1D(const Tensor1D& copyObj); // works
 	Tensor1D(Tensor1D&& moveObj); // works
 	void printElements() override; // works
@@ -34,77 +34,41 @@ public:
 	std::vector<double> flatten() override; // works
 	void transpose() override; // works
 	friend void swap(Tensor1D& left, Tensor1D& right); // works
-};
+};*/
 
 class Tensor2D : public Tensor {
 	double** data;
 	std::array<std::size_t, 2> shape; // shape[0] = row, shape[1] = column;
+
+	
 public:
-
-	Tensor2D(std::initializer_list<std::initializer_list<double>> data_, ORIENTATION m_n_ = HORIZONTAL);
-
-	~Tensor2D() noexcept;
-
-	//Tensor2D(const Tensor2D&);
-	//Tensor2D(Tensor2D&&);
-	//Tensor2D& operator=(const Tensor2D&);
-	//Tensor2D& operator=(Tensor2D&&);
-
-	///std::array<std::size_t, 2> getShape();
-	void printElements() override;
-	void transpose() override;								 									 
+	Tensor2D() : data{nullptr}, shape{0}{}
+	Tensor2D(std::initializer_list<std::initializer_list<double>> data_, Orientation m_n_ = HORIZONTAL); // works
+	~Tensor2D() noexcept; // works
+	Tensor2D(const Tensor2D& copyObj); // works
+	Tensor2D(Tensor2D&&); // works
+	Tensor2D& operator=(const Tensor2D& copyAss); // works
+	Tensor2D& operator=(Tensor2D&& moveAss); // works
+	
+	std::array<std::size_t, 2> getShape(); // works
+	void printElements() override; // works
+	void transpose() override; // does not work, after compiling "can not open - error" arised. After commenting the function out, the error is not disappearing						 									 
 	std::vector<double> flatten() override;
-	//friend void swap(Tensor2D&, Tensor2D&);
+	friend void swap(Tensor2D& left, Tensor2D& right); // works
 	
 };
-/*
+
+/*enum Orientation3D { HORIZONTAL, VERTICAL, DEPTH };
+
 class Tensor3D : public Tensor {
 	std::vector<Tensor2D> data;
-
-
-
-	double*** data;
-	std::size_t elementsCount;
-	std::array<std::size_t, 3> shape; // m x n x z ??
+	std::array<std::size_t, 3> shape; // m x n x z 
 public:
-	Tensor3D(double*** d = nullptr) :  {
+	Tensor3D(std::initializer_list<Tensor2D> data_);  // can constructor get tensor2D elements with different orientation??
 
-		std::size_t rows = sizeof d / sizeof d[0];
-		std::size_t cols = sizeof d[0] / sizeof(double);
-		std::size_t depth = ;
 
-		data = new double**[depth];
-		for (int i = 0; i < depth; ++i) {
-			data[depth] = new double* [rows];
-			for (int k = 0; k < rows; ++k) {
-				data[depth][rows] = new double[cols];
-			}
-		}
 
-		for (int i = 0; i < depth; ++i) {
-			for (int k = 0; k < rows; ++k) {
-				for (int j = 0; j < cols; ++j) {
-					data[i][k][j] = d[i][k][j];
-				}
-			}
-		}
-		
-		shape[0] = depth;
-		shape[1] = rows;
-		shape[2] = cols;
-		elementsCount = depth * rows * cols;
-	}
-
-	~Tensor3D() noexcept {
-		for (int i = 0; i < shape[0]; ++i) {
-			for (int k = 0; k < shape[1]; ++k) {{
-					delete[] data[i][k];	
-			}
-			delete[] data[i];
-		}
-		delete[] data;
-	}
-
+	~Tensor3D() noexcept;
 	
 };*/
 
