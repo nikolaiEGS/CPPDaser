@@ -217,7 +217,7 @@ Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
 	shape = { in_shape[0], in_shape[2], data.size() };
 }*/
 
-Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
+/*Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
 	std::initializer_list<const Tensor2D>::const_iterator it = data_.begin();
 	std::array<std::size_t, 2> in_shape = it->getShape();
 
@@ -225,7 +225,15 @@ Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
 		if (in_shape != cur->getShape()) {
 			throw WrongShapeTensorException();
 		}
-
-
+	std::copy(data_.begin(), data_.end(), data.begin());
 	shape = { in_shape[0], in_shape[2], data.size() };
+}*/
+
+Tensor3D::Tensor3D(Tensor2D Red, Tensor2D Green, Tensor2D Blue) {
+	//std::vector<Tensor2D> tmp(data_.size());
+	//std::copy(data_.begin(), data_.end(), data.begin());
+	data = { Red, Green, Blue };
+	shape = { 0 };
+
+	//shape = { in_shape[0], in_shape[2], data.size() };
 }

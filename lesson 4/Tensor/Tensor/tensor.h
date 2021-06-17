@@ -70,7 +70,9 @@ class Tensor3D {
 	std::array<std::size_t, 3> shape; // m x n x z 
 public:
 	Tensor3D() : data{ 0 }, shape{0} {}
-	Tensor3D(std::initializer_list<Tensor2D> data_);
+	//Tensor3D(std::initializer_list<Tensor2D> data_);
+	Tensor3D(Tensor2D Red, Tensor2D Green, Tensor2D Blue);
+	// 	   
 	//~Tensor3D() noexcept;
 
 };

@@ -64,7 +64,9 @@ int main() {
 	//empty.printElements();
 	Tensor2D uu({ { 1,2,3 }, { 1,2,3 } });
 	Tensor2D ii({ { 1,2,3 }, { 1,2,3 } });
+	Tensor2D ff({ { 1,2,3 }, { 1,2,3 } });
 	Tensor3D ddddd;
-	Tensor3D test({ uu, ii });
+	//Tensor3D test({ uu, ii });
+	Tensor3D test( uu, ii,ff);
 	return 0;
 }
