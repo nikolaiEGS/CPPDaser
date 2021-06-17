@@ -1,2 +1,2 @@
 ﻿  tensor.cpp
-LINK : fatal error LNK1168: cannot open C:\Users\nikolaid\source\repos\CPPDaser\lesson 4\Tensor\Debug\Tensor.exe for writing
+  Tensor.vcxproj -> C:\Users\nikolaid\source\repos\CPPDaser\lesson 4\Tensor\Debug\Tensor.exe

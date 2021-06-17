@@ -1,12 +1,10 @@
 #pragma once
+#include <exception>
 
 
-class Exception {
-	std::string msg_;
-public:
-	Exception(const std::string& msg) : msg_(msg) {}
-	~Exception() {}
-
-	std::string getMessage() const { return(msg_); }
-	
+struct WrongShapeTensorException : public std::exception {
+    const char* what() const noexcept
+    {
+        return "+++ Wrong Shape +++ (the size of the rows or colums have to be equal)";
+    }
 };

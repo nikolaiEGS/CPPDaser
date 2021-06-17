@@ -1,7 +1,10 @@
 #include "tensor.h"
+#include "Exception.h"
+
+
 
 int main() {
-	/*Tensor1D d({1,2,3,4}, ORIENTATION::VERTICAL);
+	Tensor1D d({1,2,3,4});
 	d.printElements();
 	Tensor1D dd(d);
 	dd.printElements();
@@ -23,7 +26,7 @@ int main() {
 	std::cout << "FLATTEND" << std::endl;
 	for (auto x : flattend) {
 		std::cout << x << std::endl;
-	}*/
+	}
 
 	//-------------------- TENSOR 2D -------------------------------------------------------------------
 	Tensor2D tt({ { 10,20,30,40 }, {10, 20, 99, 44} });
@@ -40,10 +43,28 @@ int main() {
 	std::cout << "SHAPE 2 D" << std::endl;
 	std::cout << "row = " << shape_2D[0] << std::endl;
 	std::cout << "column = " << shape_2D[1] << std::endl;
-	//zz.transpose();
-	//zz.printElements();
-	
-	/*Tensor2D d2({ {1,2,3}, {4,5,6, 7} });
-	d2.printElements();*/
+	zz.transpose();
+	zz.printElements();
+	try {
+		Tensor2D d2({ {1,2,3}, {4,5,6, 7} });
+	}
+	catch (WrongShapeTensorException& e) {
+		std::cout << e.what() << std::endl;
+	}
+	std::vector<double> flat = zz.flatten();
+	for (double x : flat) {
+		std::cout << x<<" " << std::flush;
+	}
+
+	Tensor2D defVal(5, 5, 2.2);
+	defVal.printElements();
+
+	Tensor2D empty(5, 5);
+	//empty.setValue(99.99);
+	//empty.printElements();
+	Tensor2D uu({ { 1,2,3 }, { 1,2,3 } });
+	Tensor2D ii({ { 1,2,3 }, { 1,2,3 } });
+	Tensor3D ddddd;
+	Tensor3D test({ uu, ii });
 	return 0;
 }
