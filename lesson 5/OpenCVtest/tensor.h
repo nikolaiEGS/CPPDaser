@@ -4,6 +4,8 @@
 #include <initializer_list>
 #include <algorithm>
 #include <array>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/core.hpp>
 
 enum Orientation { HORIZONTAL, VERTICAL };
 
@@ -72,9 +74,8 @@ public:
 	Tensor3D() : data{ 0 }, shape{0} {}
 	
 	Tensor3D(std::initializer_list<Tensor2D> data_);
-	
-	//Tensor3D(Tensor2D Red, Tensor2D Green, Tensor2D Blue);
-	// 	   
+	Tensor3D(const cv::Mat& mat);
+
 	~Tensor3D() noexcept {};
 
 };

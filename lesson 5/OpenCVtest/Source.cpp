@@ -2,6 +2,7 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 using namespace cv;
 int main() {
@@ -82,6 +83,10 @@ int main() {
         std::cout << "Could not open or find the image" << std::endl;
         return -1;
     }
+
+	Mat grayImage;
+	cv::cvtColor(image, grayImage, cv::COLOR_BGRA2GRAY);
+	Tensor3D d(image);
 
     namedWindow("Display window", WINDOW_AUTOSIZE); // Create a window for display.
     imshow("Display window", image); // Show our image inside it.

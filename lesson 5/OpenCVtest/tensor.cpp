@@ -221,6 +221,34 @@ Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
 	shape = { data.size(), in_shape[0], in_shape[1], };
 }
 
+Tensor3D::Tensor3D(const cv::Mat& mat) {
+	//CV_Assert(I.depth() == CV_8U);
+
+	const int channels = mat.channels();
+	std::vector<cv::Mat> three_channels;
+	cv::split(mat, three_channels);
+
+	switch (channels) {
+		case 1:{
+			for (int i = 0; i < mat.rows; i++) {
+				for (int j = 0; j < mat.cols; j++) {
+					//std::cout << mat.at<uchar>(i, j) << std::endl;
+				}
+			}
+
+			break;
+		}
+		case 3: {
+			for (int i = 0; i < mat.rows; i++) {
+				for (int j = 0; j < mat.cols; j++) {
+					//std::cout << three_channels[0].at<uchar>(i, j) << " " << three_channels[0].at<uchar>(i, j) << " " << three_channels[0].at<uchar>(i, j) << std::endl;
+				}
+			}
+		}
+	}
+
+}
+
 /*Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
 	std::initializer_list<const Tensor2D>::const_iterator it = data_.begin();
 	std::array<std::size_t, 2> in_shape = it->getShape();
