@@ -225,14 +225,12 @@ Tensor3D::Tensor3D(const cv::Mat& mat) {
 	//CV_Assert(I.depth() == CV_8U);
 
 	const int channels = mat.channels();
-	std::vector<cv::Mat> three_channels;
-	cv::split(mat, three_channels);
 
 	switch (channels) {
-		case 1:{
+		case 1: {
 			for (int i = 0; i < mat.rows; i++) {
 				for (int j = 0; j < mat.cols; j++) {
-					//std::cout << mat.at<uchar>(i, j) << std::endl;
+					// work with  mat.at<uchar>(i, j)
 				}
 			}
 
@@ -241,12 +239,11 @@ Tensor3D::Tensor3D(const cv::Mat& mat) {
 		case 3: {
 			for (int i = 0; i < mat.rows; i++) {
 				for (int j = 0; j < mat.cols; j++) {
-					//std::cout << three_channels[0].at<uchar>(i, j) << " " << three_channels[0].at<uchar>(i, j) << " " << three_channels[0].at<uchar>(i, j) << std::endl;
+					//work with mat.at<cv::Vec3b>(i, j)[0], mat.at<cv::Vec3b>(i, j)[1] and mat.at<cv::Vec3b>(i, j)[2]
 				}
 			}
 		}
 	}
-
 }
 
 /*Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {

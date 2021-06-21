@@ -4,6 +4,47 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+
+void f(cv::Mat& mat) {
+	const int channels = mat.channels();
+
+	switch (channels) {
+		case 1: {
+			for (int i = 0; i < mat.rows; i++) {
+				for (int j = 0; j < mat.cols; j++) {
+					//std::cout << mat.at<uchar>(i, j) << std::endl;
+				}
+			}
+
+			break;
+		}
+		case 3: {
+			for (int i = 0; i < mat.rows; i++) {
+				for (int j = 0; j < mat.cols; j++) {
+					if (mat.at<cv::Vec3b>(i, j)[0] > 100) {
+						mat.at<cv::Vec3b>(i, j)[0] = 250;
+					}
+					else {
+						mat.at<cv::Vec3b>(i, j)[0] = 0;
+					}
+					if (mat.at<cv::Vec3b>(i, j)[1] > 100) {
+						mat.at<cv::Vec3b>(i, j)[1] = 250;
+					}
+					else {
+						mat.at<cv::Vec3b>(i, j)[1] = 0;
+					}
+					if (mat.at<cv::Vec3b>(i, j)[2] > 100) {
+						mat.at<cv::Vec3b>(i, j)[2] = 250;
+					}
+					else {
+						mat.at<cv::Vec3b>(i, j)[2] = 0;
+					}
+				}
+			}
+		}
+	}
+}
+
 using namespace cv;
 int main() {
 	
@@ -87,6 +128,8 @@ int main() {
 	Mat grayImage;
 	cv::cvtColor(image, grayImage, cv::COLOR_BGRA2GRAY);
 	Tensor3D d(image);
+	
+	f(image);
 
     namedWindow("Display window", WINDOW_AUTOSIZE); // Create a window for display.
     imshow("Display window", image); // Show our image inside it.
