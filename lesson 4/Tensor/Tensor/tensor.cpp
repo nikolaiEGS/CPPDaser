@@ -60,7 +60,7 @@ void Tensor1D::transpose() {
 	}
 }
 
-std::array<std::size_t, 2> Tensor1D::getShape() {
+std::array<std::size_t, 2> Tensor1D::getShape() const{
 	return shape;
 }
 
@@ -104,9 +104,8 @@ void Tensor2D::allocate2D(const std::size_t rowSize, const std::size_t columnSiz
 }
 
 Tensor2D::Tensor2D(std::initializer_list<std::initializer_list<double>> data_) {
-
 	auto* it = data_.begin();
-	std::size_t in_size = it->size(); // {{in_size}, {in_size}}
+	std::size_t in_size = it->size();
 	
 	while (++it != data_.end()) {
 		if (in_size != it->size()) {
@@ -176,7 +175,7 @@ Tensor2D& Tensor2D::operator=(Tensor2D&& moveAss) {
 	return *this;
 }
 
-std::array<std::size_t, 2> Tensor2D::getShape() {
+std::array<std::size_t, 2> Tensor2D::getShape() const {
 	return shape;
 }
 
@@ -201,25 +200,28 @@ std::vector<double> Tensor2D::flatten() const {
 ///////////////// TENSOR 3 D /////////////////////////////////////
 
 Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
-	//std::initializer_list<const Tensor2D>::const_iterator it = data_.begin();
-	//std::array<std::size_t, 2> in_shape = it->getShape();
+	auto it = data_.begin();
 	
-	std::vector<Tensor2D> tmp;
-	for (const auto& cur : data_) {
+	auto in_shape = it->getShape();
+	
+	//std::vector<Tensor2D> tmp;
+	/*for (const auto& cur : data_) {
 		tmp.push_back(cur);
-	}
-	//std::copy(data_.begin(), data_.end(), tmp.begin()); +++ >> does not work
-	std::array<std::size_t, 2> in_shape = tmp[0].getShape();
-	for (std::size_t i = 0; i < tmp.size()-1;) {
+	}*/
+	//std::copy(data_.begin(), data_.end(), tmp.begin());
+	//std::array<std::size_t, 2> in_shape = tmp[0].getShape();
+	/*for (std::size_t i = 0; i < tmp.size()-1;) {
 		if (in_shape!= tmp[++i].getShape()) {
 			throw WrongShapeTensorException();
 		}
 	}
+
 	for (const auto& cur : tmp) {
 		data.push_back(cur);
-	}
-	//std::copy(tmp.begin(), tmp.end(), data.begin()); +++ >> does not work
-	shape = { in_shape[0], in_shape[1], data.size() };
+	}*/
+
+	std::copy(data_.begin(), data_.end(), std::back_inserter(data));
+	shape = { in_shape[0], in_shape[1], data.size() }; //change 
 }
 void Tensor3D::printElements() {
 	for (const auto& cur : data) {
@@ -254,10 +256,12 @@ Tensor3D& Tensor3D::operator=(Tensor3D&& moveAss) {
 	return *this;
 }
 
+std::array<std::size_t, 3> Tensor3D::getShape() {
+	return shape;
+}
+
 void Tensor3D::transpose() {
-	for (auto& cur : data) {
-		cur.transpose();
-	}
+	for (auto& cur : data) { cur.transpose(); }
 }
 
 std::vector<double> Tensor3D::flatten() const {
@@ -269,3 +273,4 @@ std::vector<double> Tensor3D::flatten() const {
 	}
 	return flattend;
 }
+

@@ -10,7 +10,7 @@ enum Orientation { HORIZONTAL, VERTICAL };
 class Tensor {
 public:
 	virtual ~Tensor() noexcept {}
-	virtual std::array<std::size_t, 2> getShape() = 0;
+	virtual std::array<std::size_t, 2> getShape() const = 0;
 	virtual std::vector<double> flatten() const = 0;
 	virtual void transpose() = 0;
 	virtual void printElements() const = 0;
@@ -22,66 +22,71 @@ class Tensor1D : public Tensor {
 	std::array<std::size_t, 2> shape;
 public:
 	Tensor1D() : data{ nullptr }, size{ 0 }, shape{0}{}
-	Tensor1D(std::initializer_list<double> data_, Orientation m_n_ = HORIZONTAL ); // works
-	virtual ~Tensor1D() noexcept; // works
+	Tensor1D(std::initializer_list<double>, Orientation m_n_ = HORIZONTAL ); // works
+	virtual ~Tensor1D() noexcept;
 
-	Tensor1D(const Tensor1D& copyObj); // works
-	Tensor1D(Tensor1D&& moveObj); // works
-	void printElements() const override; // works
-	Tensor1D& operator=(const Tensor1D& copyAss); // works
-	Tensor1D& operator=(Tensor1D&& moveAss); // wokrs
+	Tensor1D(const Tensor1D&);
+	Tensor1D(Tensor1D&&);
+	void printElements() const override;
+	Tensor1D& operator=(const Tensor1D&);
+	Tensor1D& operator=(Tensor1D&&);
 
-	std::array<std::size_t, 2> getShape() override; // works
-	std::vector<double> flatten() const override; // works
-	void transpose() override; // works
-	friend void swap(Tensor1D& left, Tensor1D& right); // works
+	std::array<std::size_t, 2> getShape() const override;
+	std::vector<double> flatten() const override;
+	void transpose() override;
+	friend void swap(Tensor1D&, Tensor1D&);
 };
 
 class Tensor2D : public Tensor {
 	double** data;
-	std::array<std::size_t, 2> shape; // shape[0] = row, shape[1] = column;
+	std::array<std::size_t, 2> shape;
 
-	void allocate2D(const std::size_t row, const std::size_t column); // works
-	void allocate2D(const std::size_t row, std::size_t column, const double defVal); // works
+	void allocate2D(const std::size_t, const std::size_t);
+	void allocate2D(const std::size_t, std::size_t, const double);
 	
 public:
 	Tensor2D() : data{nullptr}, shape{0}{}
-	Tensor2D(std::initializer_list<std::initializer_list<double>> data_); // works
-	Tensor2D(const std::size_t m, const std::size_t n); // works
-	Tensor2D(const std::size_t m, const std::size_t n, const double defaultVal); // works
-	~Tensor2D() noexcept; // works
+	Tensor2D(std::initializer_list<std::initializer_list<double>>);
+	Tensor2D(const std::size_t, const std::size_t);
+	Tensor2D(const std::size_t, const std::size_t, const double);
+	~Tensor2D() noexcept;
 
-	Tensor2D(const Tensor2D& copyObj); // works
-	Tensor2D(Tensor2D&&); // works
-	Tensor2D& operator=(const Tensor2D& copyAss); // works
-	Tensor2D& operator=(Tensor2D&& moveAss); // works
+	Tensor2D(const Tensor2D&);
+	Tensor2D(Tensor2D&&);
+	Tensor2D& operator=(const Tensor2D&);
+	Tensor2D& operator=(Tensor2D&&);
 	
-	std::array<std::size_t, 2> getShape(); // works
-	void printElements() const override; // works
-	void transpose() override; // work					 									 
-	std::vector<double> flatten() const override; // work
-	friend void swap(Tensor2D& left, Tensor2D& right); // works
-	void setValue(const double val); // works
-};
+	std::array<std::size_t, 2> getShape() const;
+	void printElements() const override;
+	void transpose() override;				 									 
+	std::vector<double> flatten() const override;
+	friend void swap(Tensor2D&, Tensor2D&);
+	void setValue(const double);
 
+	Tensor2D& matmul(const Tensor2D& r); // [DAVID] - to implement
+};
 
 class Tensor3D {
 	std::vector<Tensor2D> data;
-	std::array<std::size_t, 3> shape; // m x n x z 
+	std::array<std::size_t, 3> shape;
 public:
 	Tensor3D() : data {0}, shape{0} {}
-	Tensor3D(std::initializer_list<Tensor2D> data_); // works
+	Tensor3D(std::initializer_list<Tensor2D>);
+	//Tensor3D(const cv::Mat& mat); // [DAVID] - to implement
 	~Tensor3D() noexcept{}
 
-	Tensor3D(const Tensor3D& copy); // works
-	Tensor3D(Tensor3D&& move); // works
-	Tensor3D& operator=(const Tensor3D& copyAss); // works
-	Tensor3D& operator=(Tensor3D&& moveAss); // works
+	Tensor3D(const Tensor3D&y);
+	Tensor3D(Tensor3D&&);
+	Tensor3D& operator=(const Tensor3D&);
+	Tensor3D& operator=(Tensor3D&&);
 
-	void transpose(); // work					 									 
-	std::vector<double> flatten() const; // works
+	std::array<std::size_t, 3> getShape();
+	void transpose();					 									 
+	std::vector<double> flatten() const;
+	void printElements();
+	friend void swap(Tensor3D&, Tensor3D&);
 
-	void printElements(); // works
-	friend void swap(Tensor3D& left, Tensor3D& right); // works
+	//operator cv::Mat() const; // [DAVID] - to implement
+	double& at(int i, int j, int k); // [DAVID] - to implement
 };
 
