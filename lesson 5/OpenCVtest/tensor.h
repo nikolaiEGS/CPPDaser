@@ -64,6 +64,8 @@ public:
 	std::vector<double> flatten() const override; // work
 	friend void swap(Tensor2D& left, Tensor2D& right); // works
 	void setValue(const double val); // works
+
+	Tensor2D& matmul(const Tensor2D& r); // [DAVID] - to implement
 };
 
 
@@ -74,9 +76,12 @@ public:
 	Tensor3D() : data{ 0 }, shape{0} {}
 	
 	Tensor3D(std::initializer_list<Tensor2D> data_);
-	Tensor3D(const cv::Mat& mat);
+	Tensor3D(const cv::Mat& mat); // [DAVID] - to implement
 
 	~Tensor3D() noexcept {};
+	
+	operator cv::Mat() const; // [DAVID] - to implement
+	double& at(int i, int j, int k); // [DAVID] - to implement
 
 };
 
