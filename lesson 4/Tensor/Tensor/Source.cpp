@@ -62,11 +62,37 @@ int main() {
 	Tensor2D empty(5, 5);
 	//empty.setValue(99.99);
 	//empty.printElements();
-	Tensor2D uu({ { 1,2,3 }, { 1,2,3 } });
-	Tensor2D ii({ { 1,2,3 }, { 1,2,3 } });
-	Tensor2D ff({ { 1,2,3 }, { 1,2,3 } });
-	Tensor3D ddddd;
-	//Tensor3D test({ uu, ii });
-	Tensor3D test( uu, ii,ff);
+	
+		Tensor2D uu({ { 1,2,4 }, { 1,2,3 } });
+		Tensor2D ii({ { 1,2,3 }, { 1,2,3 } });
+	
+
+	std::cout << "++++++ TEST TENSOR 3D +++++++" << std::endl;
+	Tensor3D ddd({uu, ii});
+	try {
+		Tensor3D test({ uu, ii });
+	}
+	catch (WrongShapeTensorException& e) {
+		std::cout << e.what() << std::endl;
+	}
+	//std::cout << "++++++ COPY +++++++" << std::endl;
+	Tensor3D dddd({ uu, ii });
+	//Tensor3D copy(dddd);
+	//copy.printElements();
+
+	;
+	Tensor3D copy(std::move(dddd));
+	copy.printElements();
+	std::cout << "++++++ =ASS +++++++" << std::endl;
+	Tensor3D ass;
+	ass = std::move(copy);
+	ass.printElements();
+	ass.transpose();
+	ass.printElements();
+
+	std::vector<double> flat3D = ass.flatten();
+	for (double x : flat3D) {
+		std::cout << x << " " << std::flush;
+	}
 	return 0;
 }

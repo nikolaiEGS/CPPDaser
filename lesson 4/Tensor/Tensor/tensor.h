@@ -69,11 +69,19 @@ class Tensor3D {
 	std::vector<Tensor2D> data;
 	std::array<std::size_t, 3> shape; // m x n x z 
 public:
-	Tensor3D() : data{ 0 }, shape{0} {}
-	//Tensor3D(std::initializer_list<Tensor2D> data_);
-	Tensor3D(Tensor2D Red, Tensor2D Green, Tensor2D Blue);
-	// 	   
-	//~Tensor3D() noexcept;
+	Tensor3D() : data {0}, shape{0} {}
+	Tensor3D(std::initializer_list<Tensor2D> data_); // works
+	~Tensor3D() noexcept{}
 
+	Tensor3D(const Tensor3D& copy); // works
+	Tensor3D(Tensor3D&& move); // works
+	Tensor3D& operator=(const Tensor3D& copyAss); // works
+	Tensor3D& operator=(Tensor3D&& moveAss); // works
+
+	void transpose(); // work					 									 
+	std::vector<double> flatten() const; // works
+
+	void printElements(); // works
+	friend void swap(Tensor3D& left, Tensor3D& right); // works
 };
 

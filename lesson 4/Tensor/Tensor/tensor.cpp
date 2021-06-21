@@ -142,7 +142,7 @@ Tensor2D::Tensor2D(const Tensor2D& copyObj) {
 	allocate2D(shape[0], shape[1]);
 
 	for (std::size_t i = 0; i < shape[0]; ++i) {
-		std::copy(&copyObj.data[i], &copyObj.data[shape[0]], &data[i]);
+		std::copy(&copyObj.data[i][0], &copyObj.data[i][shape[1]], &data[i][0]);
 	}
 }
 
@@ -199,41 +199,73 @@ std::vector<double> Tensor2D::flatten() const {
 }
 
 ///////////////// TENSOR 3 D /////////////////////////////////////
-/*
+
 Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
 	//std::initializer_list<const Tensor2D>::const_iterator it = data_.begin();
 	//std::array<std::size_t, 2> in_shape = it->getShape();
-	std::copy(data_.begin(), data_.end(), data.begin());
-
-	std::array<std::size_t, 2> in_shape = data[0].getShape();
-	for (std::size_t i = 0; i < data.size();  ) {
-		if (in_shape != data[++i].getShape()) {
+	
+	std::vector<Tensor2D> tmp;
+	for (const auto& cur : data_) {
+		tmp.push_back(cur);
+	}
+	//std::copy(data_.begin(), data_.end(), tmp.begin()); +++ >> does not work
+	std::array<std::size_t, 2> in_shape = tmp[0].getShape();
+	for (std::size_t i = 0; i < tmp.size()-1;) {
+		if (in_shape!= tmp[++i].getShape()) {
 			throw WrongShapeTensorException();
 		}
 	}
-	//std::for_each(data.begin(), data.end(),
-	//	[in_shape](Tensor2D x) { if (in_shape != x.getShape()) { throw WrongShapeTensorException(); }});
+	for (const auto& cur : tmp) {
+		data.push_back(cur);
+	}
+	//std::copy(tmp.begin(), tmp.end(), data.begin()); +++ >> does not work
+	shape = { in_shape[0], in_shape[1], data.size() };
+}
+void Tensor3D::printElements() {
+	for (const auto& cur : data) {
+		cur.printElements();
+		std::cout << std::endl;
+	}
+}
 
-	shape = { in_shape[0], in_shape[2], data.size() };
-}*/
+void swap(Tensor3D& left, Tensor3D& right) {
+	std::swap(left.data, right.data);
+	std::swap(left.shape, right.shape);
+}
 
-/*Tensor3D::Tensor3D(std::initializer_list<Tensor2D> data_) {
-	std::initializer_list<const Tensor2D>::const_iterator it = data_.begin();
-	std::array<std::size_t, 2> in_shape = it->getShape();
+Tensor3D::Tensor3D(const Tensor3D& copy) {
+	data = copy.data;
+	shape = copy.shape;
+}
 
-	for (const auto& cur : data_) {
-		if (in_shape != cur->getShape()) {
-			throw WrongShapeTensorException();
-		}
-	std::copy(data_.begin(), data_.end(), data.begin());
-	shape = { in_shape[0], in_shape[2], data.size() };
-}*/
+Tensor3D::Tensor3D(Tensor3D&& move) {
+	swap(*this, move);
+}
 
-Tensor3D::Tensor3D(Tensor2D Red, Tensor2D Green, Tensor2D Blue) {
-	//std::vector<Tensor2D> tmp(data_.size());
-	//std::copy(data_.begin(), data_.end(), data.begin());
-	data = { Red, Green, Blue };
-	shape = { 0 };
+Tensor3D& Tensor3D::operator=(const Tensor3D& copyAss) {
+	Tensor3D tmp(copyAss);
+	swap(*this, tmp);
+	return *this;
+}
 
-	//shape = { in_shape[0], in_shape[2], data.size() };
+Tensor3D& Tensor3D::operator=(Tensor3D&& moveAss) {
+	Tensor3D tmp(std::move(moveAss));
+	swap(*this, tmp);
+	return *this;
+}
+
+void Tensor3D::transpose() {
+	for (auto& cur : data) {
+		cur.transpose();
+	}
+}
+
+std::vector<double> Tensor3D::flatten() const {
+	std::vector<double> flattend(shape[0] * shape[1] * shape[2]);
+	std::size_t i = 0;
+	for (auto& cur : data) {
+		std::vector<double> tmp = cur.flatten();
+		std::copy(tmp.begin(), tmp.end(), flattend.begin() + i++ * shape[0] * shape[1]);
+	}
+	return flattend;
 }
