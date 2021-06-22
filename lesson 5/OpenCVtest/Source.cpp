@@ -1,5 +1,6 @@
 #include "tensor.h"
 #include <iostream>
+#include "Exception.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -19,6 +20,7 @@ void f(cv::Mat& mat) {
 			break;
 		}
 		case 3: {
+			
 			for (int i = 0; i < mat.rows; i++) {
 				for (int j = 0; j < mat.cols; j++) {
 					if (mat.at<cv::Vec3b>(i, j)[0] > 100) {
@@ -112,15 +114,14 @@ int main() {
 	Tensor2D ii({ { 1,2,3 }, { 1,2,3 } });
 	Tensor2D ff({ { 1,2,3 }, { 1,2,3 } });
 
-	Tensor3D test({ uu, ii });
+	Tensor3D test({ uu, ii, ff });
 	uu.printElements();
 
 
 	Mat image;
 	image = imread("./zivert.jpg", IMREAD_COLOR);
 
-    if (!image.data) // Check for invalid input
-    {
+    if (!image.data){
         std::cout << "Could not open or find the image" << std::endl;
         return -1;
     }
@@ -128,6 +129,25 @@ int main() {
 	Mat grayImage;
 	cv::cvtColor(image, grayImage, cv::COLOR_BGRA2GRAY);
 	Tensor3D d(image);
+	//d.printElements();
+	try {
+		double tst = test.at(1, 2, 2);
+		std::cout << "AT()----------------" << std::endl;
+		//test.printElements();
+		std::cout << tst << std::endl;
+	}
+	catch (WrongSize& e) {
+		std::cout << e.what() << std::endl;
+	}
+
+	Tensor2D qq({ { 1,2,3 }, { 1,2,3 } });
+	Tensor2D qqq({ { 1,1 }, { 2,2 }, { 3,3 } });
+	Mat ll = test;
+	std::cout << "------- befor mul----------" << std::endl;
+	qq.printElements();
+	qq.matmul(qqq);
+	std::cout << "------- after mul----------" << std::endl;
+	qq.printElements();
 	
 	f(image);
 
