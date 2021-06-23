@@ -338,32 +338,36 @@ double& Tensor3D::at(std::size_t depth, std::size_t row, std::size_t column) {
 }
 
 Tensor3D::operator cv::Mat() {
-	cv::Mat tmp((int)shape[1], (int)shape[2], (int)shape[0]);
-	
+	//cv::Mat tmp((int)shape[1], (int)shape[2], (int)shape[0]);
+	cv::Mat mat;
+
 	switch (shape[0]) {
 		case 1: {
+			/*
 			for (std::size_t i = 0; i < tmp.rows; ++i) {
 				for (std::size_t j = 0; j < tmp.cols; ++j) {
 					//tmp.at<uchar>(i, j) = (uchar)at(1, 1, 1);
 				}
-			}
+			}*/
 			break;
 		}
 		case 3: {
-			std::size_t l = 1;
-			while (l < shape[0]) {
-				for (int i = 0; i < tmp.rows; ++i) {
-					for (int j = 0; j < tmp.cols; ++j) {
-						std::cout << "------- inside mat operator ----------" << std::endl;
-						//tmp.at<cv::Vec3b>(i, j)[0] = (uchar)at(i, j, 1);
-						//tmp.at<cv::Vec3b>(i, j)[1] = (uchar)at(i, j, 2);
-						//tmp.at<cv::Vec3b>(i, j)[2] = (uchar)at(i, j, 3);
-						tmp.push_back((uchar)at(i, j, l));
-					}
+			std::vector<cv::Mat> channels;
+
+			for (int channel = 0; channel < shape[0]; ++channel) {
+				cv::Mat tmp(shape[1], shape[2], CV_64F);
+				//std::cout << "TMP: " << tmp << std::endl;
+				for (int row = 0; row < shape[1]; ++row) {
+					std::vector<double> rowV = data[channel].getRow(row);
+					std::memcpy(tmp.row(row).data, rowV.data(), rowV.size() * sizeof(double));
 				}
-				++l;
+				//std::cout << "TMP: " << tmp << std::endl;
+				
+				channels.push_back(tmp);
 			}
+			cv::merge(channels, mat);
+
 		}
 	}
-	return tmp;
+	return mat;
 }

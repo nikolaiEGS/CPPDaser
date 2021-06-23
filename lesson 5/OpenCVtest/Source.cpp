@@ -142,10 +142,26 @@ int main() {
 
 	Tensor2D qq({ { 1,2,3 }, { 1,2,3 } });
 	Tensor2D qqq({ { 1,1 }, { 2,2 }, { 3,3 } });
+
+	std::cout << "\n\nOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n\n\n\n";
+	test.printElements();
+	
 	Mat ll = test;
+	int c = ll.channels();
+	std::cout << ll.size << std::endl;
+	std::cout << ll << std::endl;
+	//std::cout << "xTrainData (python)  = " << std::endl << format(ll, Formatter::FMT_PYTHON) << std::endl << std::endl;
+	std::cout << "\n\nOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n\n\n\n";
+
 	std::cout << "------- befor mul----------" << std::endl;
 	qq.printElements();
-	qq.matmul(qqq);
+	qqq.transpose();
+	try {
+		qq.matmul(qqq);
+	}
+	catch (WrongSize e) {
+		std::cout << e.what() << std::endl;
+	}
 	std::cout << "------- after mul----------" << std::endl;
 	qq.printElements();
 	
