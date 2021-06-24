@@ -64,27 +64,27 @@ public:
 	std::vector<double> flatten() const override;
 	friend void swap(Tensor2D&, Tensor2D&);
 	void initializeWith(const double);
-	void setValue(int j, int k, double value);
+	void setValue(int, int, double);
 	double& getValue(std::size_t row, std::size_t colum);
 
-	Tensor2D& matmul(const Tensor2D& right); // works
-
-	std::vector<double> getRow(int i) { //[DAVID] - to complete
-		std::vector<double> t;
-		std::copy(&data[i][0], &data[i][shape[1]], std::back_inserter(t));
-		return t;
-	}
-	std::vector<double> getColumn(int i); //[DAVID] - to complete
-
+	Tensor2D& matmul(const Tensor2D& right);
+	std::vector<double> getRow(int row);
+	std::vector<double> getColumn(int column);
+	Tensor2D(const cv::Mat&);
+	std::vector<uchar> change2uchar();
 };
 
+enum imreadType {GRAY, RGB};
 class Tensor3D {
 	std::vector<Tensor2D> data;
 	std::array<std::size_t, 3> shape;
+
+	cv::Mat fillDataInMat(int channel);
 public:
 	Tensor3D() : data{ 0 }, shape{ 0 } {}
 	Tensor3D(std::initializer_list<Tensor2D>);
-	Tensor3D(const cv::Mat& mat);
+	Tensor3D(const cv::Mat&);
+	Tensor3D(const std::string& filePath, imreadType type); // works
 	~Tensor3D() noexcept {}
 
 	Tensor3D(const Tensor3D& y);
@@ -99,7 +99,9 @@ public:
 	friend void swap(Tensor3D&, Tensor3D&);
 
 	double& at(std::size_t depth, std::size_t row, std::size_t column);
-
-	operator cv::Mat(); // does not work
+	void pushChannel(const Tensor2D&);
+	
+	operator cv::Mat();
+	bool operator==(Tensor3D& right);
 	
 };

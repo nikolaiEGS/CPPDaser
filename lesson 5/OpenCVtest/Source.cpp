@@ -4,6 +4,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <cassert>
 
 
 void f(cv::Mat& mat) {
@@ -48,6 +49,15 @@ void f(cv::Mat& mat) {
 }
 
 using namespace cv;
+
+
+void assert_equal_mat(const cv::Mat& a, const cv::Mat& b) {
+	assert(a.channels() == b.channels());
+	assert(a.cols == b.cols);
+	assert(a.rows == b.rows);
+	assert(a.data == b.data);
+}
+
 int main() {
 	
 	/*
@@ -118,9 +128,7 @@ int main() {
 	uu.printElements();
 
 
-	Mat image;
-	image = imread("./zivert.jpg", IMREAD_COLOR);
-
+	Mat image = imread("./zivert.jpg", IMREAD_COLOR);
     if (!image.data){
         std::cout << "Could not open or find the image" << std::endl;
         return -1;
@@ -128,11 +136,11 @@ int main() {
 
 	Mat grayImage;
 	cv::cvtColor(image, grayImage, cv::COLOR_BGRA2GRAY);
-	Tensor3D d(image);
+	
 	//d.printElements();
 	try {
 		double tst = test.at(1, 2, 2);
-		std::cout << "AT()----------------" << std::endl;
+		std::cout << "------------- at() ----------------" << std::endl;
 		//test.printElements();
 		std::cout << tst << std::endl;
 	}
@@ -144,12 +152,30 @@ int main() {
 	Tensor2D qqq({ { 1,1 }, { 2,2 }, { 3,3 } });
 
 	std::cout << "\n\nOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n\n\n\n";
-	test.printElements();
-	
-	Mat ll = test;
+	//test.printElements();
+
+	Mat mm;
+	image.convertTo(mm, CV_64F);
+
+	cv::Mat chans[3];
+	cv::split(image, chans);
+
+
+	Tensor3D xx(image);
+	Mat ll = xx;
+
+	cv::Mat chans_ll[3];
+	cv::split(ll, chans_ll);
+
+	cv::Mat diff = chans[0] != chans_ll[0];
+	//assert_equal(chans[0], image);
+	// Equal if no elements disagree
+	bool eq = cv::countNonZero(diff) == 0;
+
+
 	int c = ll.channels();
 	std::cout << ll.size << std::endl;
-	std::cout << ll << std::endl;
+	//std::cout << ll << std::endl;
 	//std::cout << "xTrainData (python)  = " << std::endl << format(ll, Formatter::FMT_PYTHON) << std::endl << std::endl;
 	std::cout << "\n\nOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO\n\n\n\n";
 
@@ -167,8 +193,23 @@ int main() {
 	
 	f(image);
 
+	Tensor3D pic("./zivert.jpg", RGB);
+	double tsts = pic.at(1, 2, 2);
+	std::cout << "at()  tsts == "<<tsts << std::endl;
+	Mat testImage = pic;
+	
+	/*if (test == test) {
+		std::cout << "------- EQUAL----------" << std::endl;
+	}
+	else {
+		std::cout << "------- NOT NOT NOT EQUAL----------" << std::endl;
+
+	}*/
+
+	assert_equal_mat(image, image);
+
     namedWindow("Display window", WINDOW_AUTOSIZE); // Create a window for display.
-    imshow("Display window", image); // Show our image inside it.
+    imshow("Display window", testImage); // Show our image inside it.
     waitKey(0);
 
 	return 0;

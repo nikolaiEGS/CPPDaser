@@ -1,6 +1,9 @@
 #include "tensor.h"
 #include "Exception.h"
 #include <iterator>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 Tensor1D::Tensor1D(std::initializer_list<double> data_, Orientation m_n_)
 	: data{ new double[data_.size()]() }, size{ data_.size() } {
@@ -202,6 +205,7 @@ void Tensor2D::setValue(int row, int colum, double value) {
 }
 
 double& Tensor2D::getValue(std::size_t row, std::size_t column ){
+	std::cout << "-------xxxxxxxxxxxxxxx inside get Value xxxxxxxxxxxx ----------" << std::endl;
 	if ( row > shape[1] || row < 1 || column > shape[1] || column < 1) {
 		throw WrongSize();
 	}
@@ -234,6 +238,55 @@ Tensor2D& Tensor2D::matmul(const Tensor2D& right) {
 	shape[1] = right.shape[1];
 	swap(*this, tmpTens);
 	return *this;
+}
+
+Tensor2D::Tensor2D(const cv::Mat& mat) {
+	const int channels = mat.channels();
+	if (channels == 1) {
+		allocate2D(mat.rows, mat.cols);
+		for (int i = 0; i < mat.rows; ++i) {
+			for (int j = 0; j < mat.cols; ++j) {
+				setValue(i, j, mat.at<uchar>(i, j));
+			}
+		}
+		shape = { (std::size_t)mat.rows, (std::size_t)mat.cols };
+	}
+	else {
+		throw WrongSize();
+	}
+}
+
+std::vector<uchar> Tensor2D::change2uchar() {
+	std::vector<uchar> tmp;
+	std::vector<double> flattend = flatten();
+	for (std::size_t i = 0; i < flattend.size(); ++i) {
+		tmp.push_back((uchar)flattend[i]);
+	}
+	return tmp;
+}
+
+std::vector<double> Tensor2D::getRow(int row) {
+	if (row < shape[0] && row >= 0) {
+		std::vector<double> tmp;
+		std::copy(&data[row][0], &data[row][shape[1]], std::back_inserter(tmp));
+		return tmp;
+	}
+	else {
+		throw WrongSize();
+	}
+}
+
+std::vector<double> Tensor2D::getColumn(int column) {
+	if (column < shape[1] && column >= 0) {
+		std::vector<double> tmp;
+		for (int k = 0; k < shape[0]; ++k) {
+			tmp.push_back(data[k][column]);
+		}
+		return tmp;
+	}
+	else {
+		throw WrongSize();
+	}
 }
 ///////////////// TENSOR 3 D /////////////////////////////////////
 
@@ -300,74 +353,111 @@ std::vector<double> Tensor3D::flatten() const {
 
 Tensor3D::Tensor3D(const cv::Mat& mat) {
 	const int channels = mat.channels();
-
 	switch (channels) {
 		case 1: {
-			Tensor2D tmp(mat.rows, mat.cols);
-			for (int i = 0; i < mat.rows; ++i) {
-				for (int j = 0; j < mat.cols; ++j) {
-					tmp.setValue(i, j, mat.at<uchar>(i, j));
-				}
-			}
-			data.push_back(tmp);
+			Tensor2D tmp_mono(mat);
+			data.push_back(tmp_mono);
 			shape = { (std::size_t)channels, (std::size_t)mat.rows, (std::size_t)mat.cols };
 			break;
 		}
 		case 3: {
-			Tensor2D tmp_1(mat.rows, mat.cols);
-			Tensor2D tmp_2(mat.rows, mat.cols);
-			Tensor2D tmp_3(mat.rows, mat.cols);
-			for (int i = 0; i < mat.rows; ++i) {
-				for (int j = 0; j < mat.cols; ++j) {
-					tmp_1.setValue(i, j, mat.at<cv::Vec3b>(i, j)[0]);
-					tmp_2.setValue(i, j, mat.at<cv::Vec3b>(i, j)[1]);
-					tmp_3.setValue(i, j, mat.at<cv::Vec3b>(i, j)[2]);
-				}
-			}
-			data = { tmp_1, tmp_2, tmp_3 };
+			cv::Mat chans[3];
+			cv::split(mat, chans);
+			Tensor2D tmp_B(chans[0]), tmp_G(chans[1]), tmp_R(chans[2]);
+			data = { tmp_B, tmp_G, tmp_R };
 			shape = { (std::size_t)channels, (std::size_t)mat.rows, (std::size_t)mat.cols };
+			break;
+		}
+		default: {
+			throw WrongSize();
 		}
 	}
 }
-
+void Tensor3D::pushChannel(const Tensor2D& chan) {
+	data.push_back(chan);
+	++shape[0];
+}
 double& Tensor3D::at(std::size_t depth, std::size_t row, std::size_t column) {
 	if (depth > shape[0] || depth < 1 || row > shape[1] || row < 1 || column > shape[1] || column < 1) {
 		throw WrongSize();
 	}
+	std::cout << "-------xxxxxxxxxxxxxxx inside at xxxxxxxxxxxx ----------" << std::endl;
 	return data[depth-1].getValue(row, column);
 }
 
 Tensor3D::operator cv::Mat() {
-	//cv::Mat tmp((int)shape[1], (int)shape[2], (int)shape[0]);
-	cv::Mat mat;
-
 	switch (shape[0]) {
 		case 1: {
-			/*
-			for (std::size_t i = 0; i < tmp.rows; ++i) {
-				for (std::size_t j = 0; j < tmp.cols; ++j) {
-					//tmp.at<uchar>(i, j) = (uchar)at(1, 1, 1);
-				}
-			}*/
+			cv::Mat tmp = fillDataInMat(shape[0]);
+			return tmp;
 			break;
 		}
 		case 3: {
+			cv::Mat mat;
 			std::vector<cv::Mat> channels;
-
 			for (int channel = 0; channel < shape[0]; ++channel) {
-				cv::Mat tmp(shape[1], shape[2], CV_64F);
-				//std::cout << "TMP: " << tmp << std::endl;
-				for (int row = 0; row < shape[1]; ++row) {
-					std::vector<double> rowV = data[channel].getRow(row);
-					std::memcpy(tmp.row(row).data, rowV.data(), rowV.size() * sizeof(double));
-				}
-				//std::cout << "TMP: " << tmp << std::endl;
-				
+				cv::Mat tmp = fillDataInMat(channel);
 				channels.push_back(tmp);
 			}
 			cv::merge(channels, mat);
+			return mat;
+			break;
+		}
+		default: { throw WrongSize();}
+	}
+}
 
+cv::Mat Tensor3D::fillDataInMat(int channel) {
+	if (channel < shape[0] && channel >= 0) {
+		cv::Mat tmp(shape[1], shape[2], CV_8U);
+		for (int row = 0; row < shape[1]; ++row) {
+			std::vector<double> row_buffer_double = data[channel].getRow(row);
+			std::vector<uchar> row_buffer_uchar;
+			for (double curElem : row_buffer_double) {
+				row_buffer_uchar.push_back((uchar)curElem);
+			}
+			std::memcpy(tmp.row(row).data, row_buffer_uchar.data(),
+				row_buffer_uchar.size() * sizeof(uchar));
+		}
+		return tmp;
+	}
+	else {
+		throw WrongSize();
+	}
+}
+
+Tensor3D::Tensor3D(const std::string& filePath, imreadType type) {
+	cv::Mat imag;
+	if (type == GRAY) {
+		imag = cv::imread(filePath, cv::IMREAD_GRAYSCALE);
+	}
+	else if (type == RGB) {
+		imag = cv::imread(filePath, cv::IMREAD_COLOR);
+	}
+	Tensor3D tmp(imag);
+	swap(*this, tmp);
+}
+ 
+
+//does not work
+bool Tensor3D::operator==(Tensor3D& right) {
+	if (shape != right.shape) { return false; }
+
+	for (std::size_t channels = 0; channels < shape[0]; ++channels) {
+		for (std::size_t row = 0; row < shape[1]; ++row) {
+			for (std::size_t col = 0; col < shape[2]; ++col) {
+				std::cout << "------- inside == ----------" << std::endl;
+				//double tmp = this->at(channels, row, col);
+
+				//double tmpX = right.at(channels, row, col);
+				/*if ( tmp != tmpX) {
+					return false;
+				}*/
+				if(data[channels].getValue(row,col) != right.data[channels].getValue(row, col)) {
+					return false;
+				}
+			}
 		}
 	}
-	return mat;
+	return true;
 }
