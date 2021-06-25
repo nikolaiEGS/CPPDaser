@@ -139,7 +139,7 @@ int main() {
 	
 	//d.printElements();
 	try {
-		double tst = test.at(1, 2, 2);
+		double tst = test.at(1, 1, 2);
 		std::cout << "------------- at() ----------------" << std::endl;
 		//test.printElements();
 		std::cout << tst << std::endl;
@@ -196,15 +196,30 @@ int main() {
 	Tensor3D pic("./zivert.jpg", RGB);
 	double tsts = pic.at(1, 2, 2);
 	std::cout << "at()  tsts == "<<tsts << std::endl;
+
+	Tensor2D R({ { 10,10,10 }, { 200,200,200 }, { 1,2,3 } });
+	Tensor2D G({ { 10,10,10 }, { 200,200,200 }, { 1,2,3 } });
+	Tensor2D B({ { 10,10,10 }, { 200,200,200 }, { 1,2,3 } });
+
+	pic.man_to_0_250();
+
+	std::cout << "------- TEST CONVERTION TO GRAY----------" << std::endl;
+	std::cout << "xxxxxxxxxxxx befor xxxxxxxxxxxxxx" << std::endl;
+	Tensor3D RGB({ R,G,B });
+	RGB.printElements();
+	RGB.man_to_0_250();
+	std::cout << "xxxxxxxxxxxx after xxxxxxxxxxxxxx" << std::endl;
+	RGB.printElements();
 	Mat testImage = pic;
+	//double check = at(2)
 	
-	/*if (test == test) {
+	if (test == RGB) {
 		std::cout << "------- EQUAL----------" << std::endl;
 	}
 	else {
 		std::cout << "------- NOT NOT NOT EQUAL----------" << std::endl;
 
-	}*/
+	}
 
 	assert_equal_mat(image, image);
 

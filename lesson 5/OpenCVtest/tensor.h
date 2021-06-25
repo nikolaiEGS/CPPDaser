@@ -103,5 +103,6 @@ public:
 	
 	operator cv::Mat();
 	bool operator==(Tensor3D& right);
-	
+	void man_to_0_250();
+	void setValue(int channel, int row, int column, double value);
 };
