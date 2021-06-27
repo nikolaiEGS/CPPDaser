@@ -46,8 +46,12 @@ class Tensor2D : public Tensor {
 	void allocate2D(const std::size_t, const std::size_t);
 	void allocate2D(const std::size_t, std::size_t, const double);
 
+	template <typename destIterator>
+	void allocate2D(const std::size_t rowSize, const std::size_t columnSize, destIterator it);
+
+	double convolve3(int i, int j, const std::vector<double>&);
 public:
-	Tensor2D() : data{ nullptr }, shape{ 0 }{}
+	Tensor2D() : data{ nullptr }, shape{ 0,0 }{}
 	Tensor2D(std::initializer_list<std::initializer_list<double>>);
 	Tensor2D(const std::size_t, const std::size_t);
 	Tensor2D(const std::size_t, const std::size_t, const double);
@@ -57,6 +61,10 @@ public:
 	Tensor2D(Tensor2D&&);
 	Tensor2D& operator=(const Tensor2D&);
 	Tensor2D& operator=(Tensor2D&&);
+
+	Tensor2D& convolve(const std::vector<double>&);
+
+	Tensor2D& convolve(const std::vector<double>&);
 
 	std::array<std::size_t, 2> getShape() const;
 	void printElements() const override;

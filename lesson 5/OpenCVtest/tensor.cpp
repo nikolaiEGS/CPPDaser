@@ -152,6 +152,24 @@ Tensor2D::Tensor2D(Tensor2D&& moveObj) : Tensor2D() {
 	swap(*this, moveObj);
 }
 
+double Tensor2D::convolve3(int i, int j, const std::vector<double>& kernel) {
+	//check i and j if they're boundary values (like in the first/last row/column, where we need a padding)  take into account padding zeros
+	// TODO
+	
+}
+
+Tensor2D& Tensor2D::convolve(const std::vector<double>& kernel) {
+	assert(kernel.size() == 9);
+
+	for (int i = 0; i < shape[0]; ++i) {
+		for (int j = 0; j < shape[1]; ++j) {
+			// TODO: convolve data[i][j] to data[i+2][j+2] with kernel (call convolve3)
+		}
+	}
+	
+}
+
+
 void swap(Tensor2D& left, Tensor2D& right) {
 	std::swap(left.data, right.data);
 	std::swap(left.shape, right.shape);
