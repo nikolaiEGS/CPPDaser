@@ -62,10 +62,6 @@ public:
 	Tensor2D& operator=(const Tensor2D&);
 	Tensor2D& operator=(Tensor2D&&);
 
-	Tensor2D& convolve(const std::vector<double>&);
-
-	Tensor2D& convolve(const std::vector<double>&);
-
 	std::array<std::size_t, 2> getShape() const;
 	void printElements() const override;
 	void transpose() override;

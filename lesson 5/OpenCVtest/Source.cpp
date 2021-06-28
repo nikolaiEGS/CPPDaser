@@ -88,7 +88,7 @@ int main() {
 	//assert_equal_mat(image, testImage);
 
 	namedWindow("Display window", WINDOW_AUTOSIZE);
-	imshow("Display window", tensor3d_to_image1);
+	imshow("Display window", testImage);
 	waitKey(0);
 
 	return 0;
