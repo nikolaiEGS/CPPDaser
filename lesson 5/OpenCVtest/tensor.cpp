@@ -97,6 +97,18 @@ void Tensor2D::allocate2D(const std::size_t rowSize, const std::size_t columnSiz
 	}
 }
 
+template <typename destIterator>
+void Tensor2D::allocate2D(const std::size_t rowSize, const std::size_t columnSize, destIterator it) {
+	data = new double* [rowSize];
+	for (std::size_t i = 0; i < rowSize; ++i) {
+		data[i] = new double[columnSize];
+	
+		for (std::size_t j = 0; j < columnSize; ++j) {
+			data[i][j] = *it++;
+		}
+	}
+}
+
 void Tensor2D::allocate2D(const std::size_t rowSize, const std::size_t columnSize, const double defaultVal) {
 	data = new double* [rowSize];
 	std::vector<double> val(columnSize, defaultVal);
@@ -153,9 +165,23 @@ Tensor2D::Tensor2D(Tensor2D&& moveObj) : Tensor2D() {
 }
 
 double Tensor2D::convolve3(int i, int j, const std::vector<double>& kernel) {
-	//check i and j if they're boundary values (like in the first/last row/column, where we need a padding)  take into account padding zeros
-	// TODO
-	
+	int iKernel = 0;
+	double res = 0;
+
+	std::pair<int, int> leftTopPoint(i - 1, j - 1);
+	std::pair<int, int> rightBottomPoint(i + 1, j + 1);
+
+	for (int row = leftTopPoint.first; row != rightBottomPoint.first; ++row) {
+		for (int col = leftTopPoint.second; col != rightBottomPoint.second; ++col) {
+			double pixelValue = 0;
+			if (row >=0 && col >= 0 && row < shape[0] && col <= shape[1]) {
+				pixelValue = data[row][col];
+			}
+
+			res += kernel[iKernel++] * pixelValue;
+		}
+	}
+	return res;
 }
 
 Tensor2D& Tensor2D::convolve(const std::vector<double>& kernel) {
@@ -163,10 +189,12 @@ Tensor2D& Tensor2D::convolve(const std::vector<double>& kernel) {
 
 	for (int i = 0; i < shape[0]; ++i) {
 		for (int j = 0; j < shape[1]; ++j) {
-			// TODO: convolve data[i][j] to data[i+2][j+2] with kernel (call convolve3)
+			double res = convolve3(i, j, kernel);
+			data[i][j] = res;
+			int a = 5;
 		}
 	}
-	
+	return *this;
 }
 
 
@@ -264,13 +292,17 @@ Tensor2D::Tensor2D(const cv::Mat& mat) {
 	const int channels = mat.channels();
 	if (channels == 1) {
 		shape = { (std::size_t)mat.rows, (std::size_t)mat.cols };
-		allocate2D(mat.rows, mat.cols);
-		for (int i = 0; i < mat.rows; ++i) {
-			for (int j = 0; j < mat.cols; ++j) {
-				setValue(i, j, mat.at<uchar>(i, j));
+
+		if (mat.isContinuous()) {
+			allocate2D(mat.rows, mat.cols, mat.begin<uchar>());
+		} else {
+			allocate2D(mat.rows, mat.cols);
+			for (int i = 0; i < mat.rows; ++i) {
+				for (int j = 0; j < mat.cols; ++j) {
+					setValue(i, j, mat.at<uchar>(i, j));
+				}
 			}
 		}
-		
 	}
 	else {
 		throw WrongSize();
@@ -519,4 +551,12 @@ void Tensor3D::man_to_0_250() {
 			}
 		}  
 	}
+}
+
+Tensor3D& Tensor3D::convolve(const std::vector<double>& kernel) {
+	for (Tensor2D& channelMat : data) {
+		channelMat.convolve(kernel);
+	}
+
+	return *this;
 }
