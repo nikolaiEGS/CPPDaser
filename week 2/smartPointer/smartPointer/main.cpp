@@ -46,7 +46,8 @@ shared_ptr<T, F>::~shared_ptr() noexcept {
 	}
 }
 template <typename T, typename F>
-shared_ptr<T,F>::shared_ptr(const shared_ptr& copy) : ptr(copy.ptr), delete_ptr(copy.delete_ptr), count_ptr(copy.count_ptr) {
+shared_ptr<T,F>::shared_ptr(const shared_ptr& copy) :
+	ptr(copy.ptr), delete_ptr(copy.delete_ptr), count_ptr(copy.count_ptr) {
 		if (ptr) { ++* count_ptr; }
 }
 
@@ -59,7 +60,7 @@ template <typename T, typename F>
 constexpr std::size_t shared_ptr<T,F>::count() const { return *count_ptr; }
 
 template <typename T, typename F>
-shared_ptr<T,F>& shared_ptr<T, F>::operator=(shared_ptr& assign) { // what is fi count_prt is 0 ?? count_ptr can not be negative, or??
+shared_ptr<T,F>& shared_ptr<T, F>::operator=(shared_ptr& assign) {
 	shared_ptr<T, F> tmp(assign);
 	swap(*this, tmp);
 	return *this;
@@ -67,7 +68,7 @@ shared_ptr<T,F>& shared_ptr<T, F>::operator=(shared_ptr& assign) { // what is fi
 
 template <typename T, typename F>
 shared_ptr<T,F>& shared_ptr<T,F>::operator=(shared_ptr&& move_ptr) noexcept {
-	shared_ptr tmp(std::move(move_ptr)); // what happens?, is destructor called?
+	shared_ptr tmp(std::move(move_ptr));
 	swap(*this, tmp);
 	return *this;
 }

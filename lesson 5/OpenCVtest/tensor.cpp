@@ -302,10 +302,10 @@ Tensor2D::Tensor2D(const cv::Mat& mat) {
 	const int channels = mat.channels();
 	if (channels == 1) {
 		shape = { (std::size_t)mat.rows, (std::size_t)mat.cols };
-
 		if (mat.isContinuous()) {
 			allocate2D(mat.rows, mat.cols, mat.begin<uchar>());
-		} else {
+		}
+		else {
 			allocate2D(mat.rows, mat.cols);
 			for (int i = 0; i < mat.rows; ++i) {
 				for (int j = 0; j < mat.cols; ++j) {
@@ -354,29 +354,28 @@ std::vector<double> Tensor2D::getColumn(int column) {
 
 
 double Tensor2D::convolve3(int i, int j, const std::vector<double>& kernel) {
-	double tmp = 0;
-	for (int m = i-1, x = 0; m < i+2; ++m) {
-		for (int n = j-1; n < j+2; ++n) {
-			if (m >= 0 && n >= 0 && m < shape[0] && n < shape[1]) {
-				tmp += data[m][n] * kernel[x];
+	double sum = 0;
+	for (int row = i-1, index = 0; row < i+2; ++row) {
+		for (int col = j-1; col < j+2; ++col) {
+			if (row >= 0 && col >= 0 && row < shape[0] && col < shape[1]) {
+				sum += data[row][col] * kernel[index];
 			}
-			++x;
+			++index;
 		}
 	}
-	return tmp;
+	return sum;
 }
 
 Tensor2D& Tensor2D::convolve(const std::vector<double>& kernel) {
 	assert(kernel.size() == 9);
-	Tensor2D tmp(shape[0], shape[1]);
+	Tensor2D convolvedChannel(shape[0], shape[1]);
+
 	for (int i = 0; i < shape[0]; ++i) {
-		std::vector<double> buffer;
 		for (int j = 0; j < shape[1]; ++j) {
-			buffer.push_back(convolve3(i, j, kernel));	
+			convolvedChannel.data[i][j] = convolve3(i, j, kernel);
 		}
-		std::copy(buffer.begin(), buffer.end(), &tmp.data[i][0]);
 	}
-	swap(*this, tmp);
+	swap(*this, convolvedChannel);
 	return *this;
 }
 ///////////////// TENSOR 3 D /////////////////////////////////////

@@ -119,5 +119,4 @@ public:
 	void darkenImage(double amount);
 	void lightenImage(double amount);
 	Tensor3D& convolve(const std::vector<double>&);
-
 };

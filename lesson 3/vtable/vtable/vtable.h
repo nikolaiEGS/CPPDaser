@@ -87,17 +87,5 @@ public:
 			return info_();
 		}
 	}
-
-	std::string v_get_name(FunctionType type) {
-		if (type == FunctionType::VIRTUAL) {
-			const auto& function = vtable->find("Employee::name")->second;
-			return ((*this).*function)();
-		}
-		else {
-			return name_();
-		}
-	}
-
-
 };
 
