@@ -46,8 +46,12 @@ class Tensor2D : public Tensor {
 	void allocate2D(const std::size_t, const std::size_t);
 	void allocate2D(const std::size_t, std::size_t, const double);
 
+	template <typename destIterator>
+	void allocate2D(const std::size_t rowSize, const std::size_t columnSize, destIterator it);
+	double convolve3(int i, int j, const std::vector<double>& kernel);
+
 public:
-	Tensor2D() : data{ nullptr }, shape{ 0 }{}
+	Tensor2D() : data{ nullptr }, shape{ 0, 0 }{}
 	Tensor2D(std::initializer_list<std::initializer_list<double>>);
 	Tensor2D(const std::size_t, const std::size_t);
 	Tensor2D(const std::size_t, const std::size_t, const double);
@@ -72,6 +76,9 @@ public:
 	std::vector<double> getColumn(int column);
 	Tensor2D(const cv::Mat&);
 	std::vector<uchar> change2uchar();
+
+	Tensor2D& convolve(const std::vector<double>&);
+
 };
 
 enum imreadType {GRAY, RGB};
@@ -81,10 +88,10 @@ class Tensor3D {
 
 	cv::Mat fillDataInMat(int channel);
 public:
-	Tensor3D() : data{ 0 }, shape{ 0 } {}
+	Tensor3D() : shape{ 0, 0, 0 } {}
 	Tensor3D(std::initializer_list<Tensor2D>);
 	Tensor3D(const cv::Mat&);
-	Tensor3D(const std::string& filePath, imreadType type); // works
+	Tensor3D(const std::string& filePath, imreadType type);
 	~Tensor3D() noexcept {}
 
 	Tensor3D(const Tensor3D& y);
@@ -99,10 +106,14 @@ public:
 	friend void swap(Tensor3D&, Tensor3D&);
 
 	double& at(std::size_t depth, std::size_t row, std::size_t column);
+	void setValue(int channel, int row, int column, double value);
 	void pushChannel(const Tensor2D&);
 	
 	operator cv::Mat();
 	bool operator==(Tensor3D& right);
 	void man_to_0_250();
-	void setValue(int channel, int row, int column, double value);
+	void darkenImage(double amount);
+	void lightenImage(double amount);
+	Tensor3D& convolve(const std::vector<double>&);
+
 };

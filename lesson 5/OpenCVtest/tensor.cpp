@@ -106,6 +106,15 @@ void Tensor2D::allocate2D(const std::size_t rowSize, const std::size_t columnSiz
 	}
 }
 
+template <typename destIterator>
+void Tensor2D::allocate2D(const std::size_t rowSize, const std::size_t columnSize, destIterator it) {
+	data = new double* [rowSize];
+	for (std::size_t i = 0; i < rowSize; ++i) {
+		data[i] = new double[columnSize];
+		std::copy(it+(i*columnSize), it+((i+1)*columnSize), &data[i][0]);
+	}
+}
+
 Tensor2D::Tensor2D(std::initializer_list<std::initializer_list<double>> data_) {
 	auto* it = data_.begin();
 	std::size_t in_size = it->size();
@@ -246,13 +255,7 @@ Tensor2D::Tensor2D(const cv::Mat& mat) {
 	const int channels = mat.channels();
 	if (channels == 1) {
 		shape = { (std::size_t)mat.rows, (std::size_t)mat.cols };
-		allocate2D(mat.rows, mat.cols);
-		for (int i = 0; i < mat.rows; ++i) {
-			for (int j = 0; j < mat.cols; ++j) {
-				setValue(i, j, mat.at<uchar>(i, j));
-			}
-		}
-		
+		if (mat.isContinuous()) { allocate2D(mat.rows, mat.cols, mat.begin<uchar>()); }	
 	}
 	else {
 		throw WrongSize();
@@ -290,6 +293,34 @@ std::vector<double> Tensor2D::getColumn(int column) {
 	else {
 		throw WrongSize();
 	}
+}
+
+
+double Tensor2D::convolve3(int i, int j, const std::vector<double>& kernel) {
+	double tmp = 0;
+	for (int m = i-1, x = 0; m < i+2; ++m) {
+		for (int n = j-1; n < j+2; ++n) {
+			if (m >= 0 && n >= 0 && m < shape[0] && n < shape[1]) {
+				tmp += data[m][n] * kernel[x];
+			}
+			++x;
+		}
+	}
+	return tmp;
+}
+
+Tensor2D& Tensor2D::convolve(const std::vector<double>& kernel) {
+	assert(kernel.size() == 9);
+	Tensor2D tmp(shape[0], shape[1]);
+	for (int i = 0; i < shape[0]; ++i) {
+		std::vector<double> buffer;
+		for (int j = 0; j < shape[1]; ++j) {
+			buffer.push_back(convolve3(i, j, kernel));	
+		}
+		std::copy(buffer.begin(), buffer.end(), &tmp.data[i][0]);
+	}
+	swap(*this, tmp);
+	return *this;
 }
 ///////////////// TENSOR 3 D /////////////////////////////////////
 
@@ -384,7 +415,6 @@ double& Tensor3D::at(std::size_t channel, std::size_t row, std::size_t column) {
 	if (channel >= shape[0] || channel < 0 || row >= shape[1] || row < 0 || column >= shape[1] || column < 0) {
 		throw WrongSize();
 	}
-	//std::cout << "{{{  AT }}}" << std::endl;
 	return data[channel].getValue(row, column);
 }
 
@@ -393,32 +423,32 @@ Tensor3D::operator cv::Mat() {
 		case 1: {
 			cv::Mat tmp = fillDataInMat(shape[0]);
 			return tmp;
-			break;
 		}
 		case 3: {
 			cv::Mat mat;
 			std::vector<cv::Mat> channels;
-			for (int channel = 0; channel < shape[0]; ++channel) {
+			for (int channel = 1; channel <= shape[0]; ++channel) {
 				cv::Mat tmp = fillDataInMat(channel);
-				channels.push_back(tmp);
+				channels.push_back(std::move(tmp));
 			}
 			cv::merge(channels, mat);
 			return mat;
-			break;
 		}
 		default: { throw WrongSize();}
 	}
 }
 
 cv::Mat Tensor3D::fillDataInMat(int channel) {
-	if (channel < shape[0] && channel >= 0) {
+	if (channel <= shape[0] && channel > 0) {
 		cv::Mat tmp(shape[1], shape[2], CV_8U);
 		for (int row = 0; row < shape[1]; ++row) {
-			std::vector<double> row_buffer_double = data[channel].getRow(row);
+			std::vector<double> row_buffer_double = data[channel-1].getRow(row);
 			std::vector<uchar> row_buffer_uchar;
-			for (double curElem : row_buffer_double) {
-				row_buffer_uchar.push_back((uchar)curElem);
-			}
+	
+			uchar y = 0;
+			std::transform(row_buffer_double.begin(), row_buffer_double.end(),
+				std::back_inserter(row_buffer_uchar), [&y](double x) { return y = (uchar)x; });
+
 			std::memcpy(tmp.row(row).data, row_buffer_uchar.data(),
 				row_buffer_uchar.size() * sizeof(uchar));
 		}
@@ -441,21 +471,12 @@ Tensor3D::Tensor3D(const std::string& filePath, imreadType type) {
 	swap(*this, tmp);
 }
  
-
-//does not work
 bool Tensor3D::operator==(Tensor3D& right) {
 	if (shape != right.shape) { return false; }
 
 	for (std::size_t channels = 0; channels < shape[0]; ++channels) {
 		for (std::size_t row = 0; row < shape[1]; ++row) {
 			for (std::size_t col = 0; col < shape[2]; ++col) {
-				std::cout << "------- inside == ----------" << std::endl;
-				//double tmp = this->at(channels, row, col);
-
-				//double tmpX = right.at(channels, row, col);
-				/*if ( tmp != tmpX) {
-					return false;
-				}*/
 				if(data[channels].getValue(row,col) != right.data[channels].getValue(row, col)) {
 					return false;
 				}
@@ -480,7 +501,6 @@ void Tensor3D::man_to_0_250() {
 				for (int j = 0; j < shape[2]; ++j) {
 					if (at(0, i, j) > 100) {
 						setValue(0, i, j, 250);
-						
 					}
 					else {
 						setValue(0, i, j, 0);
@@ -501,4 +521,39 @@ void Tensor3D::man_to_0_250() {
 			}
 		}  
 	}
+}
+
+void Tensor3D::darkenImage(double amount) {
+	switch (shape[0]) {
+		case 3: {
+			for (int i = 0; i < shape[1]; ++i) {
+				for (int j = 0; j < shape[2]; ++j) {
+					setValue(0, i, j, at(0, i, j) - ((amount / 100) * at(0, i, j)));
+					setValue(1, i, j, at(1, i, j) - ((amount / 100) * at(1, i, j)));
+					setValue(2, i, j, at(2, i, j) - ((amount / 100) * at(2, i, j)));
+				}
+			}
+		}
+	}
+}
+
+void Tensor3D::lightenImage(double amount) {
+	switch (shape[0]) {
+	case 3: {
+		for (int i = 0; i < shape[1]; ++i) {
+			for (int j = 0; j < shape[2]; ++j) {
+				setValue(0, i, j, at(0, i, j) + ((amount / 100) * at(0, i, j)));
+				setValue(1, i, j, at(1, i, j) + ((amount / 100) * at(1, i, j)));
+				setValue(2, i, j, at(2, i, j) + ((amount / 100) * at(2, i, j)));
+			}
+		}
+	}
+	}
+}
+
+Tensor3D& Tensor3D::convolve(const std::vector<double>& kernel) {
+	for (int i = 0; i < shape[0]; ++i) {
+		data[i].convolve(kernel);
+	}
+	return *this;
 }
