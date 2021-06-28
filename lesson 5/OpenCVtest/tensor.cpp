@@ -171,8 +171,9 @@ double Tensor2D::convolve3(int i, int j, const std::vector<double>& kernel) {
 	std::pair<int, int> leftTopPoint(i - 1, j - 1);
 	std::pair<int, int> rightBottomPoint(i + 1, j + 1);
 
-	for (int row = leftTopPoint.first; row != rightBottomPoint.first; ++row) {
-		for (int col = leftTopPoint.second; col != rightBottomPoint.second; ++col) {
+	double d = data[0][0];
+	for (int row = leftTopPoint.first; row <= rightBottomPoint.first; ++row) {
+		for (int col = leftTopPoint.second; col <= rightBottomPoint.second; ++col) {
 			double pixelValue = 0;
 			if (row >=0 && col >= 0 && row < shape[0] && col <= shape[1]) {
 				pixelValue = data[row][col];

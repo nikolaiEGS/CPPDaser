@@ -32,7 +32,7 @@ void assert_equal_mat(const cv::Mat& a, const cv::Mat& b) {
 
 int main() {
 	
-	Mat image = imread("./zivert.jpg", IMREAD_GRAYSCALE);
+	Mat image = imread("./zivert.jpg", IMREAD_COLOR);
 	if (!image.data) {
 		std::cout << "Could not open or find the image" << std::endl;
 		return -1;
@@ -43,8 +43,9 @@ int main() {
 
 	assert_equal_mat(image, tensor3d_to_image);
 
-	image_to_tensor3d.convolve(std::vector<double>(9, 0.25));
+	image_to_tensor3d.convolve(std::vector<double>(9, 0.11));
 
+	//image_to_tensor3d.convolve({0,0,0,0,1,0,0,0,0});
 	Mat tensor3d_to_image1 = image_to_tensor3d;
 
 	namedWindow("Display window", WINDOW_AUTOSIZE);
