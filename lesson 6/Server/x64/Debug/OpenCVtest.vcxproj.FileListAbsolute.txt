@@ -1,0 +1,2 @@
+D:\Nikokai\lesson 5\OpenCVtest\x64\Debug\OpenCVtest.exe
+D:\Nikokai\lesson 6\Server\x64\Debug\OpenCVtest.exe
