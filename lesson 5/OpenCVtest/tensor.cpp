@@ -476,6 +476,7 @@ Tensor3D::operator cv::Mat() {
 				channels.push_back(std::move(tmp));
 			}
 			cv::merge(channels, mat);
+			std::cout << " XXXXXXXXXXXXX  END of operator cv:: MAT function XXXXXXXXXXXXXXXXXX " << std::endl;
 			return mat;
 		}
 		default: { throw WrongSize();}
@@ -487,15 +488,19 @@ cv::Mat Tensor3D::fillDataInMat(int channel) {
 		cv::Mat tmp(shape[1], shape[2], CV_8U);
 		for (int row = 0; row < shape[1]; ++row) {
 			std::vector<double> row_buffer_double = data[channel-1].getRow(row);
-			std::vector<uchar> row_buffer_uchar;
-	
-			uchar y = 0;
+			std::vector<uchar> row_buffer_uchar(row_buffer_double.size());
+
+			/*uchar y = 0;
 			std::transform(row_buffer_double.begin(), row_buffer_double.end(),
-				std::back_inserter(row_buffer_uchar), [&y](double x) { return y = (uchar)x; });
+				std::back_inserter(row_buffer_uchar), [&y](double x) { return y = (uchar)x; });*/
+
+			std::transform(row_buffer_double.begin(), row_buffer_double.end(),
+				std::back_inserter(row_buffer_uchar), [](double x) { return (uchar)x; }); // check function !!!
 
 			std::memcpy(tmp.row(row).data, row_buffer_uchar.data(),
 				row_buffer_uchar.size() * sizeof(uchar));
 		}
+		std::cout << " XXXXXXXXXXXXXXX  fill mat  XXXXXXXXXXXXXXXX " << std::endl;
 		return tmp;
 	}
 	else {

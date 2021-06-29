@@ -37,13 +37,16 @@ int main() {
 		std::cout << "Could not open or find the image" << std::endl;
 		return -1;
 	}
-
+	
 	Tensor3D image_to_tensor3d(image);
-	Mat tensor3d_to_image = image_to_tensor3d;
 
-	assert_equal_mat(image, tensor3d_to_image);
+	
+//	Mat tensor3d_to_image = image_to_tensor3d;
 
-	image_to_tensor3d.convolve(std::vector<double>(9, 0.11));
+	//std::cout << " XXXXXXXXXXXXXX  AFTER operator cv::Mat  XXXXXXXXXXXXXXXXX " << std::endl;
+	//assert_equal_mat(image, tensor3d_to_image);
+
+	//image_to_tensor3d.convolve(std::vector<double>(9, 0.11));
 
 	Tensor3D pic("./zivert.jpg", RGB);
 	double tsts = pic.at(1, 2, 2);
@@ -53,6 +56,8 @@ int main() {
 	Tensor2D G({ { 10,10,10 }, { 200,200,200 }, { 1,2,3 } });
 	Tensor2D B({ { 10,10,10 }, { 200,200,200 }, { 1,2,3 } });
 
+	Tensor3D RGB({ R,G,B });
+	Mat testRGB = RGB;
 	//pic.man_to_0_250();
 	//pic.darkenImage(50);
 	//pic.lightenImage(90);
@@ -78,7 +83,7 @@ int main() {
 	std::vector<double> kernel_test(9, 0.11);
 	std::vector<double> kernel_id({ 0,0,0,0,1,0,0,0,0});
 	pic.convolve(kernel_id);
-	Mat testImage = pic;
+	//Mat testImage = pic;
 
 	std::cout << "------- TEST CONVOLUTION----------" << std::endl;
 	R.printElements();
@@ -88,7 +93,7 @@ int main() {
 	//assert_equal_mat(image, testImage);
 
 	namedWindow("Display window", WINDOW_AUTOSIZE);
-	imshow("Display window", testImage);
+	imshow("Display window", image);
 	waitKey(0);
 
 	return 0;
