@@ -8,13 +8,35 @@
 class Logger {
 	std::ofstream os;
 	std::mutex mu;
-
+	std::mutex mu2;
 public:
 	Logger() {
 		os.open("log.txt");
 	}
+	/*
 	void print_m(const std::string& m, std::thread::id id, int i) {
 		std::lock_guard<std::mutex> l(mu);
+		std::lock_guard<std::mutex> l2(mu2);
+		os << m << " " << id << " " << i << std::endl;
+	}
+
+	void print_m2(const std::string& m, std::thread::id id, int i) {
+		std::lock_guard<std::mutex> l2(mu2);
+		std::lock_guard<std::mutex> l(mu);
+		os << m << " " << id << " " << i << std::endl;
+	}
+	*/
+	void print_m(const std::string& m, std::thread::id id, int i) {
+		std::lock(mu, mu2);
+		std::lock_guard<std::mutex> l(mu, std::adopt_lock);
+		std::lock_guard<std::mutex> l2(mu2, std::adopt_lock);
+		os << m << " " << id << " " << i << std::endl;
+	}
+
+	void print_m2(const std::string& m, std::thread::id id, int i) {
+		std::lock(mu, mu2);
+		std::lock_guard<std::mutex> l2(mu2, std::adopt_lock);
+		std::lock_guard<std::mutex> l(mu, std::adopt_lock);
 		os << m << " " << id << " " << i << std::endl;
 	}
 };
