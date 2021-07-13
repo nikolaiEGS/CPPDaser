@@ -3,40 +3,50 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <chrono>
 
 std::mutex mtx;
-std::condition_variable cv;
+std::condition_variable cv_consumer, cv_producer;
 bool ready_for_pop = false;
 
 std::vector<int> storage;
 bool flag = false;
+int value = 0;
 
 void consumer() {
 	while (1) {
-		if (flag && storage.empty()) { break; }
 
 		std::unique_lock<std::mutex> lck(mtx);
-		cv.wait(lck, [&] {return ready_for_pop; });
+		cv_producer.wait(lck, [&] {return ready_for_pop; });
 
 		if (!storage.empty()) {
 			storage.pop_back();
-			std::cout << "--- pop back ---" << std::endl;
+			--value;
+			std::cout << "--- pop back ---  " << std::endl;
+			ready_for_pop = false;
+			//cv_consumer.notify_all();
+			std::this_thread::sleep_for(std::chrono::microseconds(30));
 		}
 	}
 }
 
 void producer() {
+	
+	while (1){
+	//	
 
-	for (int i = 0; i < 1000; ++i) {
 		std::unique_lock<std::mutex> lck(mtx);
-		storage.push_back(i);
+		//cv_consumer.wait(lck, [&] {return (!ready_for_pop); });
+		std::this_thread::sleep_for(std::chrono::microseconds(20));
 
-		std::cout << "--- push: "<< i << std::endl;
+		if (storage.size() != 1000) {
+			storage.push_back(value++);
+			std::cout << "--- push: " << value << std::endl;
+		}
 
 		ready_for_pop = true;
-		cv.notify_all();
+		cv_producer.notify_all();
 	}
-	flag = true;
 }
 
 
