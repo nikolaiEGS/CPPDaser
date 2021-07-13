@@ -5,12 +5,29 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
     }
+
+    try {
+        InputStream stream = getAssets().open("zivert.jpg");
+
+        int size = stream.available();
+        byte[] buffer = new byte[size];
+        stream.read(buffer);
+        stream.close();
+    } catch (IOException e) {
+        // Handle exceptions here
+    }
+    private native void sendData(byte[] buffer);
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

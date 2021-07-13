@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>	//inet_addr
+#include <unistd.h>	//write
+#include <iostream>
+
+int main(int argc , char *argv[]) {
+	int s, client_socket, c, read_size;
+	sockaddr_in server, client;
+	char client_message[2000] = {0};
+
+	
+	
+	if (((s = socket(AF_INET , SOCK_STREAM , 0)) < 0)) {
+		std::cout << "Could not create socket" << std::endl;
+		std::cout << strerror(errno);
+		return -1;
+	}
+
+	std::cout << "Socket created" << std::endl;
+	
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = inet_addr("192.168.148.130");
+	server.sin_port = htons( 8888 );
+	
+	//Bind
+	if (bind(s, (sockaddr *)&server, sizeof(server)) < 0) {
+		std::cout << "bind failed. Error" << std::endl;
+		std::cout << strerror(errno);
+		return -1;
+	}
+    std::cout << "bind done" << std::endl;
+	
+	//Listen
+	listen(s, 3);
+	
+	//Accept and incoming connection
+	std::cout << "Waiting for incoming connections..." << std::endl;
+	c = sizeof(sockaddr_in);
+	
+	//accept connection from an incoming client
+	if ((client_socket = accept(s, (sockaddr *)&client, (socklen_t*)&c)) < 0) {
+		std::cout << "accept failed" << std::endl;
+		std::cout << strerror(errno);
+		return -1;
+	}
+
+	std::cout << "Connection accepted" << std::endl;
+	
+	//1. add a recv to get the length of the image  
+	char size_string_recv[32] = {0};
+	int size_pic = std::stoi(size_string_recv);
+	recv(client_socket , size_string_recv , 2000 , 0);	
+
+	//2. create a new char array with the received size - l
+	char pic_recv[size_pic];
+
+	//3. recv in a while loop the image into the created buffer 
+	std::size_t tmp_size = 0;
+	while( (read_size = recv(client_socket , &pic_recv[tmp_size] , size_pic - tmp_size, 0)) > 0 ) {
+		tmp_size += read_size;
+		if (size_pic == tmp_size) break;
+	}
+
+	//4. send to the client bytes_received
+	std::string send_string_size = std::to_string(tmp_size);
+	send(client_socket, &send_string_size, send_string_size.size(),0);
+
+
+	if(read_size == 0) {
+		std::cout << "Client disconnected" <<std::endl;
+	}
+	else if(read_size == -1) {
+		std::cout << "recv failed" << std::endl;
+	}
+	
+	return 0;
+}
