@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.example.tensor.databinding.ActivityMainBinding;
+import com.example.tensor.R;
 
 import java.io.IOException;
 import java.io.InputStream;
