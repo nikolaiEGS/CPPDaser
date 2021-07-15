@@ -10,15 +10,28 @@
 
 #define LOG_TAG "CLIENT_APP"
 
+jbyteArray getImage(jobject context, JNIEnv* env) {
+    jclass contextThemeWrapperClass = env->FindClass("android/view/ContextThemeWrapper");
+    jmethodID getAssetsID = env->GetMethodID(contextThemeWrapperClass, "getAssets", "()Landroid/content/res/AssetManager;");
+    jobject assets = env->CallObjectMethod(context, getAssetsID);
+//!! could you please give me a hint, how I can call open on die jobject assets??
+    // call open on assets object and continue the rest of the code
+    jclass AssetManager = env->FindClass("android/content/res/AssetManager");
+    jmethodID openFile = env->GetMethodID(AssetManager, "open", "([type)Landroid/content/res/AssetManager");
+    jobject open = env->CallObjectMethod(context, openFile);
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_tensorapp_MainActivity_stringFromJNI(
         JNIEnv* env,
-        jobject /* this */) {
+        jobject context, jbyteArray buffer) {
 
     int s;
     sockaddr_in server;
     char server_reply[32] = {0};
     std::string message = "hello server TEST";
+
+    //getImage(context, env);
 
     if (((s = socket(AF_INET , SOCK_STREAM , 0)) < 0)) {
         __android_log_write(ANDROID_LOG_ERROR, LOG_TAG, strerror(errno));
@@ -38,14 +51,15 @@ Java_com_example_tensorapp_MainActivity_stringFromJNI(
 
     __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, "connected!");
 
-    jbyteArray* cData = env->GetByteArrayElements(data);
-    std::size_t size = sizeof(cData);
-    char* picTransmit = new char[size];
-    picTransmit = (char*)cData;
+    char *picTransmit = (char*) env->GetByteArrayElements(buffer, nullptr);
+    std::size_t size = env->GetArrayLength(buffer);
     std::string length = std::to_string(size);
     std::size_t sendSize = 0, tmp_size = 0;
-    send(s, &length, length.size(), 0);
-    while((sendSize = send(s, &picTransmit[tmp_size], size - tmp_size , 0) > 0) {
+
+    send(s, length.c_str(), length.size(), 0);
+
+
+    while((sendSize = send(s, &picTransmit[tmp_size], size - tmp_size , 0) > 0)) {
         tmp_size += sendSize;
         //__android_log_write(ANDROID_LOG_ERROR, LOG_TAG, strerror(errno));
         //return env->NewStringUTF((std::string("ERROR in send") +strerror(errno)).c_str());
@@ -61,9 +75,6 @@ Java_com_example_tensorapp_MainActivity_stringFromJNI(
 
     close(s);
 
-    return env->NewStringUTF("bytes received from server =  " + server_reply);
-}extern "C"
-JNIEXPORT void JNICALL
-Java_com_example_tensorapp_MainActivity_sendData(JNIEnv *env, jobject thiz, jbyteArray data) {
-    // TODO: implement sendData()
+    return env->NewStringUTF((std::string("bytes received from server =  ") + server_reply).c_str());
 }
+
