@@ -11,31 +11,33 @@
 
 #define LOG_TAG "CLIENT_APP"
 
-jbyteArray* getImage(jobject context, JNIEnv* env) {
+jbyteArray getImage(jobject context, JNIEnv* env) {
     jclass contextThemeWrapperClass = env->FindClass("android/view/ContextThemeWrapper");
+    jclass assetManagerClass = env->FindClass("android/content/res/AssetManager");
+    jclass inputStreamClass = env->FindClass("java/io/InputStream");
+
     jmethodID getAssetsID = env->GetMethodID(contextThemeWrapperClass, "getAssets", "()Landroid/content/res/AssetManager;");
+    jmethodID openID = env->GetMethodID(assetManagerClass, "open", "(Ljava/lang/String;)Ljava/io/InputStream;");
+    jmethodID availableID = env->GetMethodID(inputStreamClass, "available", "()I");
+    jmethodID readID = env->GetMethodID(inputStreamClass, "read", "([B)I");
+    jmethodID closeID = env->GetMethodID(inputStreamClass, "close", "()V");
+
     jobject assets = env->CallObjectMethod(context, getAssetsID);
+    jobject stream = env->CallObjectMethod(assets, openID, env->NewStringUTF("zivert.jpg"));
 
-//!! could you please give me a hint, how I can call open on die jobject assets??
-    // call open on assets object and continue the rest of the code
-    jclass AssetManager = env->FindClass("android/content/res/AssetManager");
-    jmethodID openFile = env->GetMethodID(AssetManager, "open", "([type)Ljava/io/InputStream;"); // ??
-    jobject open = env->CallObjectMethod(context, openFile);
+    jint size = env->CallIntMethod(stream, availableID);
+    jbyteArray buffer = env->NewByteArray(size);
+    jint r = env->CallIntMethod(stream, readID, buffer);
 
-    jclass InputStream = env->FindClass("java/io/InputStream");
-    jmethodID available = env->GetMethodID(InputStream, "available()", ()I);  // available() returns 0; how does it return the size?
-    jint size = env->CallIntMethod(context, available);
+    env->CallVoidMethod(stream, closeID);
 
-    jbyteArray jbuffer[size];
-    // how can we get the row and column size of the pictur?
+    env->DeleteLocalRef(contextThemeWrapperClass);
+    env->DeleteLocalRef(assetManagerClass);
+    env->DeleteLocalRef(inputStreamClass);
+    env->DeleteLocalRef(assets);
+    env->DeleteLocalRef(stream);
 
-    jmethodID read = env->GetMethodID(InputStream, "read", (jbyteArray)I); // ??
-    jint result = env->CallIntMethod(context, read, jbuffer);
-
-    jmethodID close = env->GetMethodID(InputStream, "close", ()); // ??
-    env->CallVoidMethod(context, close);
-
-    return jbuffer;
+    return buffer;
 }
 
 extern "C" JNIEXPORT jstring JNICALL

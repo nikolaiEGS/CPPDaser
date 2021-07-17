@@ -5,7 +5,6 @@ import com.example.tensor.R;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.example.tensor.databinding.ActivityMainBinding;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
             int size = stream.available();
             byte[] buffer = new byte[size];
-            stream.read(buffer);
+            int r = stream.read(buffer);
             stream.close();
             return buffer;
         } catch (IOException e) {
