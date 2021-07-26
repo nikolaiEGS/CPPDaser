@@ -1,0 +1,3 @@
+C:\Users\nikolaid\source\repos\CPPDaser\lesson 5\OpenCVtest\x64\Debug\OpenCVtest.exe
+C:\Users\nikolaid\Desktop\OpenCVtest\x64\Debug\OpenCVtest.exe
+C:\Users\nikolaid\Desktop\Backup\OpenCVtest\x64\Debug\OpenCVtest.exe

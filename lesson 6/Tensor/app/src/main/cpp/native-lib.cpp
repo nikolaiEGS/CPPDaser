@@ -25,8 +25,9 @@ jbyteArray getImage(jobject context, JNIEnv* env) {
     jobject assets = env->CallObjectMethod(context, getAssetsID);
     jobject stream = env->CallObjectMethod(assets, openID, env->NewStringUTF("zivert.jpg"));
 
-    jint size = env->CallIntMethod(stream, availableID);
-    jbyteArray buffer = env->NewByteArray(size);
+    jint j_size = env->CallIntMethod(stream, availableID);
+    std::size_t size = (std::size_t)j_size;
+    jbyteArray buffer = env->NewByteArray(j_size);
     jint r = env->CallIntMethod(stream, readID, buffer);
 
     env->CallVoidMethod(stream, closeID);
@@ -43,12 +44,12 @@ jbyteArray getImage(jobject context, JNIEnv* env) {
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_tensorapp_MainActivity_stringFromJNI(
         JNIEnv* env,
-        jobject context, jbyteArray buffer) {
+        jobject context) {
 
     int server_socket;
     sockaddr_in server;
     char server_reply[1000] = {0};
-    getImage(context, env);
+
 
     if (((server_socket = socket(AF_INET , SOCK_STREAM , 0)) < 0)) {
         __android_log_write(ANDROID_LOG_ERROR, LOG_TAG, strerror(errno));
@@ -68,10 +69,12 @@ Java_com_example_tensorapp_MainActivity_stringFromJNI(
 
     __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, "connected!");
 
-    char *picTransmit = (char*) env->GetByteArrayElements(buffer, nullptr);
+    jbyteArray buffer = getImage(context, env);
     std::size_t size = env->GetArrayLength(buffer);
+    char* picTransmit =  (char*) env->GetByteArrayElements(buffer, nullptr);
     std::string length = std::to_string(size);
     std::size_t sendSize = 0, send_counter = 0;
+
 
     send(server_socket, length.c_str(), length.size(), 0);
 

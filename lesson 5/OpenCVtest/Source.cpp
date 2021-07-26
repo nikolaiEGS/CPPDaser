@@ -5,6 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <cassert>
+#include <array>
 
 using namespace cv;
 
@@ -77,14 +78,29 @@ int main() {
 
 	std::vector<double> kernel_test(9, 0.11);
 	std::vector<double> kernel_id({ 0,0,0,0,1,0,0,0,0});
-	pic.convolve(kernel_id);
-	Mat testImage = pic;
+	pic.convolve(kernel_line);
+	
 
 	std::cout << "------- TEST CONVOLUTION----------" << std::endl;
 	R.printElements();
 	
-	R.convolve(kernel_test);
+	R.convolve(kernel_line);
 	R.printElements();
+
+	char KKK[] = { 1,2,3,4,5,6,7,8,9 };
+	Tensor2D KKKtoT(KKK, 0, 3, 3);
+	KKKtoT.printElements();
+	std::vector<double> checkresult = KKKtoT.flatten();
+	for (auto x : checkresult) {
+		std::cout << x << "  " << std::endl;
+	}
+	std::vector<double>tmpFlattend = pic.flatten();
+	std::array<std::size_t,3> shape = pic.getShape();
+	std::size_t size = tmpFlattend.size();
+	char* tmpChar = new char[size];
+	std::copy(tmpFlattend.begin(), tmpFlattend.end(), &tmpChar[0]);
+	Tensor3D testCon(tmpChar, size, shape[1], shape[2]);
+	Mat testImage = pic;
 	//assert_equal_mat(image, testImage);
 
 	namedWindow("Display window", WINDOW_AUTOSIZE);
